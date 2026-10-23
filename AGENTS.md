@@ -3,7 +3,8 @@
 ## Alcance y estado
 
 Este proyecto desarrolla una herramienta independiente de detallado de secciones de muros
-de concreto reforzado. La base activa incluye RCWD-000, los contratos RCWD-001A y la interfaz Excel RCWD-001B.
+de concreto reforzado. La base activa incluye RCWD-000, los contratos RCWD-001A,
+la interfaz Excel RCWD-001B y el prototipo web local RCWD-UI-000.
 Leer `README.md` y
 `docs/development_roadmap.md` antes de ampliar funcionalidades. Los directorios reservados
 no implican que sus motores estén implementados.
@@ -37,5 +38,6 @@ no implican que sus motores estén implementados.
 
 Usar el paquete `rcwall` bajo `src/`, pruebas en `tests/`, documentación en `docs/` y
 decisiones en `docs/adr/`. Las salidas generadas van en `outputs/` o `generated/`.
+La interfaz web vive en `src/rcwall_web/`; el núcleo `rcwall` no importa este adaptador.
 No agregar servicios, repositorios abstractos, interfaces CAD ni capas de orquestación
 hasta que un caso de uso implementado las necesite.

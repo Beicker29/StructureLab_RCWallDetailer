@@ -30,7 +30,8 @@ topología reutilizables se ubicarán desde el inicio en `geometry`.
 Las verificaciones normativas no quedan autorizadas por esta numeración. Antes de
 programarlas se requiere definir norma, edición, jurisdicción, entradas y alcance, y
 asignarles un hito o alcance aprobado independiente. Tampoco se incluyen una interfaz
-gráfica, integración con AutoCAD ni formatos CAD adicionales.
+gráfica dentro de esos hitos, integración con AutoCAD ni formatos CAD adicionales.
+RCWD-UI-000 es un alcance independiente aprobado posteriormente para el prototipo web local.
 
 ## Cierre de RCWD-000
 
@@ -63,3 +64,15 @@ La revisión incluye 165 pruebas (115 previas + 50 Excel), Ruff y vistas de las 
 La interacción nativa de Microsoft Excel no se ejecutó. Las políticas libres y los estados
 pendientes siguen sin resolución algorítmica; RCWD-002 y posteriores conservan sus puertas
 de aprobación y definición de alcance.
+
+## RCWD-UI-000 — Prototipo web local
+
+Implementado como adaptador hermano `rcwall_web`: FastAPI, servicios sin estado,
+HTML/CSS/JavaScript/SVG. Crea definiciones geométricas rectangulares con origen explícito,
+valida cambios de dimensiones, selecciona contornos/barras explícitas y conserva el
+documento completo al importar/exportar JSON 0.1.0. No modifica contratos ni motores.
+
+Incluye pruebas HTTP y de navegador con capturas de selección, zoom, desplazamiento,
+precisión y aislamiento. Ver [guía y límites](web_prototype.md) y [ADR-006](adr/ADR-006-local-web-prototype.md).
+Las propuestas RCWD-UI-001 están registradas allí; no autorizan nuevos motores, reglas
+normativas, edición de barras, DXF ni despliegue público.

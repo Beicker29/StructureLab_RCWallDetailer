@@ -1,0 +1,153 @@
+{
+  "assignments": [
+    {
+      "assignment_id": "A1",
+      "level_id": "L1",
+      "section_id": "S1",
+      "wall_id": "W1"
+    },
+    {
+      "assignment_id": "A2",
+      "level_id": "L2",
+      "section_id": "S2",
+      "wall_id": "W1"
+    },
+    {
+      "assignment_id": "A3",
+      "level_id": "L1",
+      "section_id": "S1",
+      "wall_id": "W2"
+    }
+  ],
+  "bar_layouts": [
+    {
+      "config_id": "C1",
+      "distribution": {
+        "alignment": null,
+        "diameter_mm": "16",
+        "end_offset_mm": "0",
+        "pattern": "LINEAR_COUNT",
+        "quantity": 9007199254740993,
+        "reference_id": "REF1",
+        "start_offset_mm": "0"
+      },
+      "layout_id": "LAYOUT1",
+      "region_id": null
+    },
+    {
+      "config_id": "C1",
+      "distribution": {
+        "bars": [
+          {
+            "bar_id": "B1",
+            "diameter_mm": "32.00",
+            "position": {
+              "x_mm": "100.000000000000000000001",
+              "y_mm": "100"
+            }
+          },
+          {
+            "bar_id": "B2",
+            "diameter_mm": "32.00",
+            "position": {
+              "x_mm": "2900",
+              "y_mm": "100"
+            }
+          }
+        ],
+        "pattern": "EXPLICIT"
+      },
+      "layout_id": "EXPLICIT",
+      "region_id": null
+    }
+  ],
+  "bent_bars": [],
+  "configurations": [
+    {
+      "config_id": "C1",
+      "description": null,
+      "geometry_id": "G1"
+    }
+  ],
+  "drawings": [],
+  "geometries": [
+    {
+      "description": "Muro de prueba · barras declaradas",
+      "geometry_id": "G1",
+      "shape": {
+        "kind": "RECTANGLE",
+        "length_mm": "3000.000000000000000000000000001",
+        "origin": {
+          "x_mm": "0",
+          "y_mm": "0"
+        },
+        "thickness_mm": "200.00"
+      }
+    }
+  ],
+  "project_id": "PROJECT-EXAMPLE",
+  "references": [
+    {
+      "end": {
+        "x_mm": "2900",
+        "y_mm": "100"
+      },
+      "geometry_id": "G1",
+      "kind": "LINE",
+      "reference_id": "REF1",
+      "start": {
+        "x_mm": "100",
+        "y_mm": "100"
+      }
+    }
+  ],
+  "regions": [],
+  "schema_version": "0.1.0",
+  "sections": [
+    {
+      "config_id": "C1",
+      "description": null,
+      "geometry_id": "G1",
+      "materials": {
+        "concrete": {
+          "properties": [],
+          "specification": "CONCRETE-A: ejemplo de especificación declarada"
+        },
+        "reinforcement": {
+          "properties": [],
+          "specification": "STEEL-A: ejemplo de especificación declarada"
+        }
+      },
+      "section_id": "S1"
+    },
+    {
+      "config_id": "C1",
+      "description": null,
+      "geometry_id": "G1",
+      "materials": {
+        "concrete": {
+          "properties": [],
+          "specification": "CONCRETE-A: ejemplo de especificación declarada"
+        },
+        "reinforcement": {
+          "properties": [],
+          "specification": "STEEL-A: ejemplo de especificación declarada"
+        }
+      },
+      "section_id": "S2"
+    }
+  ],
+  "transverse_assemblies": [],
+  "units": "mm",
+  "vertical_placements": [],
+  "walls": [
+    {
+      "description": null,
+      "wall_id": "W1"
+    },
+    {
+      "description": null,
+      "wall_id": "W2"
+    }
+  ]
+}

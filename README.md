@@ -9,7 +9,7 @@ El proyecto es independiente de DCCAD3, AutoCAD y formatos propietarios. Los con
 la resolución geométrica, las verificaciones normativas y la representación CAD mantienen
 responsabilidades separadas.
 
-## Estado real: RCWD-001B
+## Estado real: RCWD-UI-000
 
 Implementados los contratos canónicos V0.1 mediante Pydantic, geometrías rectangulares y
 poligonales con huecos, validación de tipos/referencias/topología, comparaciones acotadas
@@ -26,8 +26,12 @@ con estado `UNRESOLVED`. `DetailingResult` es una envoltura reservada con estado
 Implementada la interfaz Excel de 17 hojas visibles en español, con plantilla vacía,
 ejemplo diligenciado, exportación/importación y reportes de errores localizados.
 
+Implementado el prototipo web local para crear/importar geometrías rectangulares,
+editar dimensiones, visualizar barras explícitas y seleccionar, ampliar y desplazar la
+vista SVG, conservando el JSON canónico. El núcleo y el esquema 0.1.0 permanecen intactos.
+
 Pendientes: posiciones calculadas de barras, motores de detallado,
-transformaciones local/global, verificación normativa y exportación DXF. No existe CLI.
+transformaciones local/global, verificación normativa y exportación DXF.
 La validación de datos no demuestra cumplimiento de una norma estructural.
 
 ## Instalación y desarrollo
@@ -48,6 +52,46 @@ python -m venv .venv
 En Linux/macOS, crear el entorno con `python3 -m venv .venv` y utilizar
 `.venv/bin/python` con los mismos argumentos. No hace falta activar el entorno.
 Para instalar sin herramientas de desarrollo: `python -m pip install .`.
+
+### Activar el entorno virtual
+
+Una vez creada la carpeta `.venv`, abra una terminal en la raíz del repositorio.
+En Windows PowerShell (incluida la terminal integrada de VS Code):
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+En Linux/macOS con Bash o Zsh:
+
+```bash
+source .venv/bin/activate
+```
+
+Con el entorno activo aparecerá `(.venv)` al inicio de la terminal y podrá usar
+`python` directamente, por ejemplo `python -m pytest` o `python -m rcwall_web`
+si instaló el extra `web`. La activación se realiza en cada terminal nueva.
+Los comandos anteriores con la ruta completa al intérprete también funcionan sin activarlo.
+
+Para salir del entorno virtual:
+
+```text
+deactivate
+```
+
+### Abrir el prototipo web
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,web]"
+.\.venv\Scripts\python.exe -m rcwall_web
+```
+
+Abra **http://127.0.0.1:8000**. Consulte la [guía web](docs/web_prototype.md) para uso,
+pruebas de navegador, capturas, alcance y limitaciones. El proyecto vive en cada pestaña;
+exporte el JSON antes de cerrar o recargar. No se guardan proyectos en el servidor.
+
+Cierre RCWD-UI-000: **198 pruebas aprobadas** al habilitar las pruebas de navegador
+(165 previas, 31 web y 2 de navegador). Ruff check y format sin errores.
 
 La distribución se llama `structurelab-rcwalldetailer`; el paquete importable es
 `rcwall`. Las pruebas requieren instalar primero la distribución y no modifican
@@ -105,6 +149,7 @@ src/rcwall/
   io/json.py       Lectura/escritura JSON y generación de esquema
   io/excel/        Generador/lector español y diagnósticos por celda
   exporters/dxf/   Reservado para exportación
+src/rcwall_web/    Adaptador web local, separado del núcleo; FastAPI y SVG
 tests/             Instalación, contratos, topología, equivalencia y JSON
 docs/              Especificaciones, convenciones y ADR
 schemas/           JSON Schema generado para V0.1
@@ -123,6 +168,8 @@ Decimal originales, sin epsilon global.
 - [Contratos implementados y límites](docs/data_contracts.md).
 - [Interfaz Excel, columnas y uso](docs/excel_interface.md).
 - [Decisiones técnicas de Excel](docs/excel_decisions.md).
+- [Prototipo web, ejecución y evidencia visual](docs/web_prototype.md).
+- [ADR-006: interfaz local y precisión](docs/adr/ADR-006-local-web-prototype.md).
 - [Hoja de ruta](docs/development_roadmap.md).
 - [Convenciones](docs/conventions.md).
 - [ADR-001: independencia del dominio](docs/adr/ADR-001-domain-independence.md).
@@ -132,7 +179,7 @@ Decimal originales, sin epsilon global.
 - [ADR-005: coordenadas y precisión](docs/adr/ADR-005-coordinates-and-precision.md).
 - [Instrucciones para agentes](AGENTS.md).
 
-Validación con Python 3.12: se conservan las 115 pruebas anteriores y se incorporan
+Validación histórica de RCWD-001B con Python 3.12: se conservan las 115 pruebas anteriores y se incorporan
 50 pruebas Excel (165 en total). Ruff check y Ruff format --check sin errores. Esto verifica contratos y
 el subconjunto geométrico descrito, no un motor ni una comprobación normativa.
 

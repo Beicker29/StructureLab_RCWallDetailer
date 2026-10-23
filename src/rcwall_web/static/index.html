@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StructureLab · Muros</title><link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js" defer></script></head>
+<body>
+<header><div class="brand"><span class="mark">SL</span><div><strong>StructureLab</strong><span>DETALLADOR DE MUROS</span></div></div>
+<div class="version">Prototipo local <b>V0.1</b></div><nav aria-label="Proyecto">
+<button id="new">Nuevo muro</button><label class="button" for="file">Importar JSON</label>
+<input id="file" type="file" accept=".json,application/json" hidden><button id="export" class="primary" disabled>Exportar JSON</button></nav></header>
+<div class="workspace-title"><div><span class="eyebrow">ESPACIO DE TRABAJO</span><h1>Sección horizontal</h1></div><span class="pill">Milímetros · plano local XY</span></div>
+<main>
+<aside class="panel"><div class="panel-title"><span class="step">01</span><h2>Definición geométrica</h2></div>
+<label for="geometry">Geometría del proyecto</label><select id="geometry" disabled><option>Sin proyecto</option></select>
+<form id="dimensions"><label for="length">Longitud <span>mm</span></label><input id="length" type="text" inputmode="decimal" autocomplete="off" disabled>
+<label for="thickness">Espesor <span>mm</span></label><input id="thickness" type="text" inputmode="decimal" autocomplete="off" disabled>
+<p class="hint">Los cambios válidos actualizan el contorno automáticamente. Use punto decimal.</p>
+<button id="apply" type="submit" disabled>Validar cambios</button><button id="discard" type="button" disabled>Descartar cambios</button></form>
+<div class="divider"></div><h3>Origen local declarado</h3><dl id="origin"><dt>X / Y</dt><dd>—</dd></dl>
+<label for="configuration">Configuración de refuerzo</label><select id="configuration" disabled><option>Sin proyecto</option></select>
+<p class="hint" id="reinforcement-note">Se muestran únicamente barras con posiciones explícitas.</p>
+<div class="scope"><strong>Alcance del prototipo</strong><p>Edición de geometría rectangular. No realiza detallado ni verifica cumplimiento estructural.</p></div></aside>
+<section class="drawing-panel" aria-label="Visor de sección">
+<div class="drawing-toolbar"><span><i></i> Vista superior</span><div><button id="zoom-out" aria-label="Alejar">−</button><button id="zoom-in" aria-label="Acercar">+</button><button id="fit">Ajustar vista</button></div></div>
+<div class="canvas-wrap"><svg id="canvas" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -300 1200 700" role="img" aria-label="Sección horizontal del muro"><g id="scene"></g></svg>
+<div id="empty"><div class="empty-icon">▱</div><h2>Comience con una sección</h2><p>Cree un rectángulo o importe un proyecto JSON V0.1.</p><button id="empty-new" class="primary">Crear muro rectangular</button></div>
+<div class="axis" aria-hidden="true">↑ Y<br>└──→ X</div><div class="canvas-caption">Representación gráfica · valores exactos en las propiedades</div></div>
+<div class="drawing-footer"><span>Rueda: zoom · arrastrar fondo: desplazar · clic: seleccionar</span><span id="zoom-label">100 %</span></div>
+</section>
+<aside class="panel inspector"><div class="panel-title"><span class="step">02</span><h2>Propiedades</h2></div>
+<span class="eyebrow" id="selection-type">SIN SELECCIÓN</span><h3 id="selection-title">Explore la sección</h3><p class="hint" id="selection-help">Seleccione el contorno o una barra para consultar sus datos declarados.</p><dl id="properties"></dl>
+<div class="divider"></div><h3>Lectura de la vista</h3><p class="legend"><span class="swatch wall"></span>Contorno del muro</p><p class="legend"><span class="swatch bar"></span>Barra explícita</p><p class="legend"><span class="swatch selected"></span>Elemento seleccionado</p><p class="hint">La selección, el zoom y el desplazamiento no modifican el proyecto.</p>
+</aside>
+</main><footer><span id="status" role="status" aria-live="polite">Listo para crear o importar un proyecto.</span><span>RCWD-UI-000</span></footer>
+<div id="errors" role="alert" hidden></div>
+<dialog id="create-dialog"><form id="create-form"><span class="eyebrow">NUEVA DEFINICIÓN</span><h2>Muro rectangular</h2><p>Declare las dimensiones y el origen inferior izquierdo en milímetros.</p>
+<label for="new-length">Longitud (mm)</label><input id="new-length" name="length" type="text" inputmode="decimal" required>
+<label for="new-thickness">Espesor (mm)</label><input id="new-thickness" name="thickness" type="text" inputmode="decimal" required>
+<div class="pair"><div><label for="new-x">Origen X (mm)</label><input id="new-x" name="x" type="text" inputmode="decimal" required></div><div><label for="new-y">Origen Y (mm)</label><input id="new-y" name="y" type="text" inputmode="decimal" required></div></div>
+<p class="hint">Se crea una geometría sin materiales, refuerzo ni asignaciones a muros físicos. El proyecto abierto se reemplaza al crear.</p><p id="create-error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel-create">Cancelar</button><button class="primary" type="submit">Crear geometría</button></div></form></dialog>
+</body></html>

@@ -74,3 +74,15 @@ La equivalencia transversal permanece indeterminada mientras sus contratos sean 
 
 Los límites no se completan con supuestos: estados UNRESOLVED, errores explícitos o
 comparaciones UNDETERMINED indican cuándo falta semántica para continuar.
+
+## Alcance adicional aprobado e implementado: RCWD-UI-000
+
+Prototipo web local con FastAPI, HTML/CSS/JavaScript/SVG en `rcwall_web`, separado del
+núcleo. Creación de geometría rectangular con origen explícito, edición de longitud y
+espesor validados en Python, selección de contorno/barras explícitas, zoom/desplazamiento
+e importación/exportación JSON V0.1. Estado independiente por pestaña, sin almacenamiento
+de proyectos en el servidor ni modificación del contrato canónico.
+
+No incluye creación de materiales/asignaciones, resolución de distribuciones o estribos,
+reglas normativas, DXF ni despliegue público. Las propuestas para RCWD-UI-001 permanecen
+pendientes. Véase [guía, evidencia y limitaciones](web_prototype.md).

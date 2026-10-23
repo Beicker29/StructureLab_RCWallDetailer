@@ -70,3 +70,19 @@ introduce una dependencia inversa del dominio al libro. El generador de plantill
 derivar o verificar su correspondencia con los contratos versionados.
 
 Consultar los [ADR](adr/ADR-001-domain-independence.md) antes de cambiar estas fronteras.
+
+## Adaptador web RCWD-UI-000
+
+El caso de uso web aprobado introduce `src/rcwall_web/` como paquete hermano del núcleo.
+`app.py` compone FastAPI y estáticos; `routes.py` contiene rutas/modelos HTTP;
+`services.py` coordina `rcwall.domain`, `rcwall.validation` y `rcwall.io.json`;
+`static/` representa la vista en HTML/CSS/JavaScript/SVG. Ningún módulo de `rcwall`
+depende de este adaptador. FastAPI y Uvicorn son dependencias opcionales del extra `web`;
+HTTPX y Playwright pertenecen a pruebas, no al dominio ni al frontend.
+
+No hay estado de proyecto en el servidor ni persistencia compartida. El navegador conserva
+el JSON como texto opaco por pestaña; Python valida cada operación completa. La proyección
+visual y la cámara no forman parte del contrato ni de los resultados de detallado.
+Las diferencias exactas se calculan en Python y solo la representación de pantalla usa float.
+Se documenta en [ADR-006](adr/ADR-006-local-web-prototype.md), que complementa las decisiones
+previas, y en la [guía del prototipo](web_prototype.md).
