@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "structurelab-rcwalldetailer"
+version = "0.0.1"
+description = "Arquitectura inicial de StructureLab RCWallDetailer"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.9,<1"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["rcwall", "rcwall.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib -ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [".work"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
