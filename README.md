@@ -9,7 +9,7 @@ El proyecto es independiente de DCCAD3, AutoCAD y formatos propietarios. Los con
 la resolución geométrica, las verificaciones normativas y la representación CAD mantienen
 responsabilidades separadas.
 
-## Estado real: RCWD-UI-000
+## Estado real: RCWD-UI-000R
 
 Implementados los contratos canónicos V0.1 mediante Pydantic, geometrías rectangulares y
 poligonales con huecos, validación de tipos/referencias/topología, comparaciones acotadas
@@ -92,6 +92,15 @@ exporte el JSON antes de cerrar o recargar. No se guardan proyectos en el servid
 
 Cierre RCWD-UI-000: **198 pruebas aprobadas** al habilitar las pruebas de navegador
 (165 previas, 31 web y 2 de navegador). Ruff check y format sin errores.
+
+RCWD-UI-000R consolida las confirmaciones de reemplazo, conserva borradores al cancelar,
+advierte los límites de editar geometría con refuerzo y separa el frontend en módulos
+nativos. La [guía web](docs/web_prototype.md) detalla las pruebas, la CI y el seguimiento
+de versiones exportadas. Render y el despliegue público permanecen fuera de alcance.
+
+Verificación de RCWD-UI-000R: **212 pruebas aprobadas**, incluidas **10 de navegador**;
+Ruff check, Ruff format --check y pip check aprobados. La CI está configurada y su
+primera ejecución en GitHub queda pendiente de subir los cambios.
 
 La distribución se llama `structurelab-rcwalldetailer`; el paquete importable es
 `rcwall`. Las pruebas requieren instalar primero la distribución y no modifican
@@ -193,8 +202,15 @@ como trabajo posterior. No se verificó interacción manual en Microsoft Excel i
 .\.venv\Scripts\python.exe scripts/generate_excel_artifacts.py
 ```
 
-Archivos estables: [plantilla vacía](examples/excel/plantilla_v0_1.xlsx) y
-[ejemplo diligenciado](examples/excel/ejemplo_v0_1.xlsx), generado del JSON existente.
+Archivos versionados: [plantilla](examples/excel/plantilla_v0_1.xlsx) y
+[ejemplo diligenciado](examples/excel/ejemplo_v0_1.xlsx). El generador crea una plantilla
+vacía y un ejemplo a partir del JSON existente.
+
+**Estado de las copias versionadas:** estos dos libros fueron editados posteriormente;
+la plantilla contiene datos y la hoja `Barras` se renombró como `BarrasVerticales`.
+Se conservaron esas modificaciones durante RCWD-UI-000R. El lector actual exige `Barras`;
+consulte la [comparación registrada](docs/web_prototype.md#limpieza-y-preservación-de-los-excel).
+El comando de regeneración sobrescribe ambos libros: conserve sus datos antes de usarlo.
 
 ```python
 from rcwall.io.excel import export_project, inspect_workbook

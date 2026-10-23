@@ -1,4 +1,4 @@
-"""Opt-in end-to-end UI verification; screenshots are generated under outputs/ui."""
+"""Opt-in browser checks. Automated output never overwrites curated evidence."""
 
 import json
 import os
@@ -18,11 +18,260 @@ if os.environ.get("RCWALL_BROWSER_TESTS") != "1":
     )
 
 pytest.importorskip("playwright.sync_api")
+from playwright.sync_api import Error as BrowserError
 from playwright.sync_api import expect, sync_playwright
 
 from rcwall.io.json import dumps_project, loads_project, read_project
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def ui_output(tmp_path, request):
+    configured = os.environ.get("RCWALL_UI_OUTPUT")
+    base = Path(configured).resolve() if configured else tmp_path
+    curated = (ROOT / "outputs/ui").resolve()
+    if base == curated or curated in base.parents:
+        pytest.fail("Las pruebas no deben sobrescribir las capturas seleccionadas en outputs/ui.")
+    output = base / request.node.name
+    output.mkdir(parents=True, exist_ok=True)
+    return output
+
+
+@pytest.fixture
+def browser_page(server):
+    with sync_playwright() as driver:
+        browser = driver.chromium.launch()
+        page = browser.new_page(viewport={"width": 1440, "height": 960}, locale="es-CO")
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(server)
+        yield page
+        browser.close()
+        assert errors == []
+
+
+def import_document(page, document=None):
+    if document is None:
+        document = (ROOT / "outputs/ui/ejemplo-barras.json").read_text(encoding="utf-8")
+    page.locator("#file").set_input_files(
+        {
+            "name": "proyecto.json",
+            "mimeType": "application/json",
+            "buffer": document.encode("utf-8"),
+        }
+    )
+
+
+def download_document(page):
+    with page.expect_download() as download:
+        page.get_by_role("button", name="Exportar JSON").click()
+    return Path(download.value.path()).read_text(encoding="utf-8")
+
+
+def fill_new_project(page, length="5000"):
+    page.get_by_role("button", name="Nuevo muro").click()
+    for name, value in [("length", length), ("thickness", "300"), ("x", "0"), ("y", "0")]:
+        page.locator(f"#new-{name}").fill(value)
+
+
+@pytest.mark.parametrize("cancel_action", ["button", "escape"])
+def test_replacement_cancellation_keeps_project_draft_and_view(browser_page, cancel_action):
+    page = browser_page
+    import_document(page)
+    expect(page.locator("circle.bar-shape")).to_have_count(2)
+    original = download_document(page)
+    page.get_by_role("button", name="Seleccionar barra 1", exact=True).click()
+    page.get_by_role("button", name="Acercar", exact=True).click()
+    camera = page.locator("#canvas").get_attribute("viewBox")
+    inspector = page.locator("#properties").inner_text()
+    page.locator("#length").fill("0")
+    expect(page.locator("#errors")).to_be_visible()
+    confirmations = []
+
+    def cancel(dialog):
+        confirmations.append(dialog.type)
+        dialog.dismiss()
+
+    page.on("dialog", cancel)
+    fill_new_project(page)
+    page.get_by_role("button", name="Crear geometría").click()
+    assert confirmations == ["confirm"]
+    expect(page.locator("#create-dialog")).to_be_visible()
+    if cancel_action == "button":
+        page.get_by_role("button", name="Cancelar", exact=True).click()
+    else:
+        page.keyboard.press("Escape")
+    expect(page.locator("#length")).to_have_value("0")
+    assert page.locator("#canvas").get_attribute("viewBox") == camera
+    assert page.locator("#properties").inner_text() == inspector
+    expect(page.locator("#export")).to_be_disabled()
+    import_document(page, "{}")
+    assert confirmations == ["confirm", "confirm"]
+    expect(page.locator("#length")).to_have_value("0")
+    page.get_by_role("button", name="Descartar cambios").click()
+    assert download_document(page) == original
+
+
+def test_failed_import_preserves_pending_values_and_exported_baseline(browser_page):
+    page = browser_page
+    import_document(page)
+    expect(page.locator("#export")).to_be_enabled()
+    original = download_document(page)
+    page.locator("#thickness").fill("valor pendiente")
+    expect(page.locator("#errors")).to_be_visible()
+    page.on("dialog", lambda dialog: dialog.accept())
+    import_document(page, '{"project_id":')
+    expect(page.locator("#errors")).to_contain_text("JSON válido")
+    expect(page.locator("#thickness")).to_have_value("valor pendiente")
+    expect(page.locator("circle.bar-shape")).to_have_count(2)
+    expect(page.locator("#save-state")).to_have_text("Cambios sin exportar")
+    page.get_by_role("button", name="Descartar cambios").click()
+    assert download_document(page) == original
+    expect(page.locator("#save-state")).not_to_have_text("Cambios sin exportar")
+
+
+def test_confirmed_replacements_and_late_edit_do_not_mix_projects(browser_page):
+    page = browser_page
+    import_document(page)
+    expect(page.locator("#export")).to_be_enabled()
+    pending = []
+    page.route("**/api/edit", lambda route: pending.append(route))
+    page.locator("#length").fill("3900.1234567890123456789")
+    with page.expect_request("**/api/edit"):
+        page.get_by_role("button", name="Validar cambios").click()
+    page.on("dialog", lambda dialog: dialog.accept())
+    fill_new_project(page, "5100.000000000000000001")
+    page.get_by_role("button", name="Crear geometría").click()
+    expect(page.locator("#create-dialog")).not_to_be_visible()
+    expect(page.locator("#length")).to_have_value("5100.000000000000000001")
+    for route in pending:
+        with page.expect_response("**/api/edit"):
+            route.fulfill(response=route.fetch())
+    # Export goes through the accepted state after the old response has arrived.
+    document = download_document(page)
+    assert str(loads_project(document).geometries[0].shape.length_mm) == "5100.000000000000000001"
+    assert loads_project(document).bar_layouts == ()
+    import_document(page)
+    expect(page.locator("circle.bar-shape")).to_have_count(2)
+    expect(page.locator("#length")).to_have_value("3000.000000000000000000000000001")
+
+
+def test_cancel_creation_in_flight_keeps_original_project(browser_page):
+    page = browser_page
+    import_document(page)
+    expect(page.locator("#export")).to_be_enabled()
+    original = download_document(page)
+    pending = []
+    page.route("**/api/create", lambda route: pending.append(route))
+    page.on("dialog", lambda dialog: dialog.accept())
+    fill_new_project(page)
+    with page.expect_request("**/api/create"):
+        page.get_by_role("button", name="Crear geometría").click()
+    page.get_by_role("button", name="Cancelar", exact=True).click()
+    for route in pending:
+        with page.expect_response("**/api/create"):
+            route.fulfill(response=route.fetch())
+    assert download_document(page) == original
+    expect(page.locator("circle.bar-shape")).to_have_count(2)
+
+
+def test_geometric_warning_is_visible_and_bars_are_unchanged(browser_page, ui_output):
+    page = browser_page
+    import_document(page)
+    warning = page.locator("#geometry-warning")
+    expect(warning).to_be_visible()
+    for message in [
+        "coordenadas originales",
+        "no redistribuye",
+        "contención",
+        "recubrimientos",
+        "factibilidad constructiva",
+        "no significa aprobación",
+    ]:
+        expect(warning).to_contain_text(message)
+    original = json.loads(download_document(page))
+    page.locator("#length").fill("50.000000000000001")
+    expect(page.locator("#export")).to_be_enabled()
+    page.get_by_role("button", name="Seleccionar barra 1", exact=True).click()
+    expect(page.locator("#properties")).to_contain_text("100.000000000000000000001")
+    changed = json.loads(download_document(page))
+    original["geometries"][0]["shape"]["length_mm"] = "50.000000000000001"
+    assert changed == original
+    page.screenshot(path=str(ui_output / "advertencia-geometrica.png"), full_page=True)
+    page.on("dialog", lambda dialog: dialog.accept())
+    fill_new_project(page)
+    page.get_by_role("button", name="Crear geometría").click()
+    expect(page.locator("#create-dialog")).not_to_be_visible()
+    expect(warning).not_to_be_visible()
+
+
+def test_reload_guard_tracks_downloads_edits_and_discard(browser_page):
+    page = browser_page
+    fill_new_project(page)
+    page.get_by_role("button", name="Crear geometría").click()
+    expect(page.locator("#create-dialog")).not_to_be_visible()
+    dialogs = []
+
+    def stay(dialog):
+        dialogs.append(dialog.type)
+        dialog.dismiss()
+
+    page.on("dialog", stay)
+    with pytest.raises(BrowserError):
+        page.reload(timeout=3000)
+    assert dialogs == ["beforeunload"]
+    expect(page.locator("#length")).to_have_value("5000")
+    document = download_document(page)
+    expect(page.locator("#save-state")).not_to_have_text("Cambios sin exportar")
+    page.locator("#length").fill("0")
+    expect(page.locator("#errors")).to_be_visible()
+    with pytest.raises(BrowserError):
+        page.reload(timeout=3000)
+    assert dialogs == ["beforeunload", "beforeunload"]
+    page.get_by_role("button", name="Descartar cambios").click()
+    page.reload()
+    expect(page.locator("#empty")).to_be_visible()
+    assert dialogs == ["beforeunload", "beforeunload"]
+    import_document(page, document)
+    expect(page.locator("#export")).to_be_enabled()
+    page.locator("#length").click()
+    page.reload()
+    assert dialogs == ["beforeunload", "beforeunload"]
+
+
+def test_failed_or_old_export_does_not_mark_latest_version_saved(browser_page):
+    page = browser_page
+    fill_new_project(page)
+    page.get_by_role("button", name="Crear geometría").click()
+    expect(page.locator("#export")).to_be_enabled()
+    page.route(
+        "**/api/export",
+        lambda route: route.fulfill(
+            status=503,
+            content_type="application/json",
+            body='{"message":"Prueba de fallo"}',
+        ),
+    )
+    page.get_by_role("button", name="Exportar JSON").click()
+    expect(page.locator("#errors")).to_contain_text("Prueba de fallo")
+    expect(page.locator("#save-state")).to_have_text("Cambios sin exportar")
+    page.unroute("**/api/export")
+    pending = []
+    page.route("**/api/export", lambda route: pending.append(route))
+    with page.expect_request("**/api/export"):
+        page.get_by_role("button", name="Exportar JSON").click()
+    page.locator("#length").fill("6000.000000000000001")
+    expect(page.locator("#export")).to_be_enabled()
+    with page.expect_download() as download:
+        pending[0].fulfill(response=pending[0].fetch())
+    downloaded = Path(download.value.path()).read_text(encoding="utf-8")
+    assert str(loads_project(downloaded).geometries[0].shape.length_mm) == "5000"
+    expect(page.locator("#length")).to_have_value("6000.000000000000001")
+    expect(page.locator("#save-state")).to_have_text("Cambios sin exportar")
+    page.unroute("**/api/export")
+    download_document(page)
+    expect(page.locator("#save-state")).not_to_have_text("Cambios sin exportar")
 
 
 @pytest.fixture(scope="module")
@@ -60,9 +309,8 @@ def server():
         process.wait(timeout=10)
 
 
-def test_browser_creation_editing_selection_zoom_pan_and_sessions(server):
-    output = ROOT / "outputs/ui"
-    output.mkdir(parents=True, exist_ok=True)
+def test_browser_creation_editing_selection_zoom_pan_and_sessions(server, ui_output):
+    output = ui_output
     with sync_playwright() as driver:
         browser = driver.chromium.launch()
         context = browser.new_context(viewport={"width": 1440, "height": 960}, locale="es-CO")
@@ -122,18 +370,17 @@ def test_browser_creation_editing_selection_zoom_pan_and_sessions(server):
         with page.expect_download() as download:
             page.get_by_role("button", name="Exportar JSON").click()
         assert Path(download.value.path()).read_text(encoding="utf-8") == document
-        second = browser.new_context().new_page()
-        second.goto(server)
-        expect(second.locator("#empty")).to_be_visible()
-        expect(second.locator("#export")).to_be_disabled()
-        expect(second.locator("rect.wall-shape")).to_have_count(0)
+        for second in [context.new_page(), browser.new_context().new_page()]:
+            second.goto(server)
+            expect(second.locator("#empty")).to_be_visible()
+            expect(second.locator("#export")).to_be_disabled()
+            expect(second.locator("rect.wall-shape")).to_have_count(0)
         assert errors == []
         browser.close()
 
 
-def test_browser_import_bars_untrusted_text_and_exact_export(server):
-    output = ROOT / "outputs/ui"
-    output.mkdir(parents=True, exist_ok=True)
+def test_browser_import_bars_untrusted_text_and_exact_export(server, ui_output):
+    output = ui_output
     data = read_project(ROOT / "examples/project_v0_1.json").model_dump(mode="json")
     data["geometries"][0]["description"] = "Muro de prueba · barras declaradas"
     data["bar_layouts"][0]["distribution"]["quantity"] = 9007199254740993

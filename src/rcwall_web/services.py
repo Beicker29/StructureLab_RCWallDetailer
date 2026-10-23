@@ -110,11 +110,16 @@ def present(project: ProjectDefinition) -> dict:
     geometries = []
     for index, geometry in enumerate(project.geometries):
         shape = geometry.shape
+        config_ids = {
+            c.config_id for c in project.configurations if c.geometry_id == geometry.geometry_id
+        }
         item = {
             "index": index,
             "label": geometry.description or f"Geometría {index + 1}",
             "rectangular": isinstance(shape, RectangleDefinition),
             "configurations": [],
+            "has_reinforcement": any(b.config_id in config_ids for b in project.bar_layouts)
+            or any(a.config_id in config_ids for a in project.transverse_assemblies),
         }
         if isinstance(shape, RectangleDefinition):
             item["dimensions"] = {

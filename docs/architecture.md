@@ -86,3 +86,8 @@ visual y la cámara no forman parte del contrato ni de los resultados de detalla
 Las diferencias exactas se calculan en Python y solo la representación de pantalla usa float.
 Se documenta en [ADR-006](adr/ADR-006-local-web-prototype.md), que complementa las decisiones
 previas, y en la [guía del prototipo](web_prototype.md).
+
+RCWD-UI-000R consolida el frontend en módulos ES nativos: `api.js` para transporte,
+`state.js` para edición/revisiones y versión respaldada, `svg.js` para representación
+y cámara, y `app.js` para formularios y coordinación. No añade dependencias ni capas
+del backend. Se conservan las decisiones de ADR-006 y el esquema 0.1.0.

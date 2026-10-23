@@ -2,13 +2,17 @@
 <html lang="es">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>StructureLab · Muros</title><link rel="stylesheet" href="/static/style.css">
-<script src="/static/app.js" defer></script></head>
+<script src="/static/app.js" type="module"></script></head>
 <body>
 <header><div class="brand"><span class="mark">SL</span><div><strong>StructureLab</strong><span>DETALLADOR DE MUROS</span></div></div>
 <div class="version">Prototipo local <b>V0.1</b></div><nav aria-label="Proyecto">
 <button id="new">Nuevo muro</button><label class="button" for="file">Importar JSON</label>
 <input id="file" type="file" accept=".json,application/json" hidden><button id="export" class="primary" disabled>Exportar JSON</button></nav></header>
 <div class="workspace-title"><div><span class="eyebrow">ESPACIO DE TRABAJO</span><h1>Sección horizontal</h1></div><span class="pill">Milímetros · plano local XY</span></div>
+<div id="geometry-warning" class="geometry-warning" role="note" hidden>
+<strong>Edición geométrica con refuerzo asociado</strong>
+<p>Las barras declaradas conservan sus coordenadas originales. Cambiar dimensiones no redistribuye automáticamente el refuerzo. No se han comprobado contención, recubrimientos ni factibilidad constructiva. La validación canónica de datos no significa aprobación del detallado estructural.</p>
+</div>
 <main>
 <aside class="panel"><div class="panel-title"><span class="step">01</span><h2>Definición geométrica</h2></div>
 <label for="geometry">Geometría del proyecto</label><select id="geometry" disabled><option>Sin proyecto</option></select>
@@ -31,11 +35,11 @@
 <span class="eyebrow" id="selection-type">SIN SELECCIÓN</span><h3 id="selection-title">Explore la sección</h3><p class="hint" id="selection-help">Seleccione el contorno o una barra para consultar sus datos declarados.</p><dl id="properties"></dl>
 <div class="divider"></div><h3>Lectura de la vista</h3><p class="legend"><span class="swatch wall"></span>Contorno del muro</p><p class="legend"><span class="swatch bar"></span>Barra explícita</p><p class="legend"><span class="swatch selected"></span>Elemento seleccionado</p><p class="hint">La selección, el zoom y el desplazamiento no modifican el proyecto.</p>
 </aside>
-</main><footer><span id="status" role="status" aria-live="polite">Listo para crear o importar un proyecto.</span><span>RCWD-UI-000</span></footer>
+</main><footer><div><span id="status" role="status" aria-live="polite">Listo para crear o importar un proyecto.</span><br><span id="save-state"></span></div><span>RCWD-UI-000R</span></footer>
 <div id="errors" role="alert" hidden></div>
 <dialog id="create-dialog"><form id="create-form"><span class="eyebrow">NUEVA DEFINICIÓN</span><h2>Muro rectangular</h2><p>Declare las dimensiones y el origen inferior izquierdo en milímetros.</p>
 <label for="new-length">Longitud (mm)</label><input id="new-length" name="length" type="text" inputmode="decimal" required>
 <label for="new-thickness">Espesor (mm)</label><input id="new-thickness" name="thickness" type="text" inputmode="decimal" required>
 <div class="pair"><div><label for="new-x">Origen X (mm)</label><input id="new-x" name="x" type="text" inputmode="decimal" required></div><div><label for="new-y">Origen Y (mm)</label><input id="new-y" name="y" type="text" inputmode="decimal" required></div></div>
-<p class="hint">Se crea una geometría sin materiales, refuerzo ni asignaciones a muros físicos. El proyecto abierto se reemplaza al crear.</p><p id="create-error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel-create">Cancelar</button><button class="primary" type="submit">Crear geometría</button></div></form></dialog>
+<p class="hint">Se crea una geometría sin materiales, refuerzo ni asignaciones a muros físicos. Si hay un proyecto abierto, se pedirá confirmación antes de reemplazarlo.</p><p id="create-error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel-create">Cancelar</button><button id="create-submit" class="primary" type="submit">Crear geometría</button></div></form></dialog>
 </body></html>

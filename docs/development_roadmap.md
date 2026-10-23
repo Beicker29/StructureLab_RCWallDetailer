@@ -76,3 +76,21 @@ Incluye pruebas HTTP y de navegador con capturas de selección, zoom, desplazami
 precisión y aislamiento. Ver [guía y límites](web_prototype.md) y [ADR-006](adr/ADR-006-local-web-prototype.md).
 Las propuestas RCWD-UI-001 están registradas allí; no autorizan nuevos motores, reglas
 normativas, edición de barras, DXF ni despliegue público.
+
+## RCWD-UI-000R — Consolidación correctiva
+
+Confirmación de reemplazos, conservación de borradores al cancelar, seguimiento de
+versiones exportadas y aviso de salida condicionado a cambios pendientes. Advertencia
+visible al editar geometrías con refuerzo, sin mover barras ni añadir verificaciones.
+Frontend modular nativo; pruebas de regresión, evidencia automática separada de las
+capturas seleccionadas y workflows de CI principal/navegador independiente.
+
+Se mantienen núcleo y contrato 0.1.0. Los libros Excel modificados previamente se
+conservan tras compararlos con su historial; la divergencia `BarrasVerticales`/`Barras`
+se registra como pendiente, no se resuelve mediante una reversión. ADR-006 sigue vigente.
+Render y cualquier despliegue público continúan fuera de alcance.
+
+Cierre verificado localmente: 212 pruebas aprobadas (10 de navegador), Ruff check,
+Ruff format --check y pip check aprobados. Los workflows están preparados; su ejecución
+en GitHub no se declara realizada. Continúa la advertencia de deprecación de HTTPX
+en el TestClient de Starlette, sin fallos de prueba.

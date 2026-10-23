@@ -242,7 +242,8 @@ def test_local_security_boundaries_and_size_limit(client):
     assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
     assert response.headers["cache-control"] == "no-store"
     assert '<html lang="es">' in response.text
-    for name in ["style.css", "app.js"]:
+    assert 'type="module"' in response.text
+    for name in ["style.css", "app.js", "api.js", "state.js", "svg.js"]:
         assert client.get(f"/static/{name}").status_code == 200
 
 
@@ -266,5 +267,35 @@ def test_untrusted_labels_remain_data(client):
     data["geometries"][0]["description"] = label
     response = client.post("/api/import", json={"document": json.dumps(data)})
     assert response.json()["geometries"][0]["label"] == label
-    script = client.get("/static/app.js").text
-    assert "innerHTML" not in script and "JSON.parse" not in script
+    for name in ["app.js", "api.js", "state.js", "svg.js"]:
+        script = client.get(f"/static/{name}").text
+        assert "innerHTML" not in script and "JSON.parse" not in script
+
+
+@pytest.mark.parametrize("kind", ["none", "explicit", "linear", "transverse", "alternative"])
+def test_reinforcement_warning_metadata_covers_geometry_not_only_active_config(client, kind):
+    data = json.loads(rich_document())
+    if kind == "none":
+        data["bar_layouts"] = []
+    elif kind == "linear":
+        data["bar_layouts"] = data["bar_layouts"][:1]
+    elif kind == "explicit":
+        data["bar_layouts"] = data["bar_layouts"][1:]
+    elif kind == "transverse":
+        data["bar_layouts"] = []
+        data["transverse_assemblies"] = [
+            {
+                "assembly_id": "T1",
+                "config_id": "C1",
+                "definition_status": "UNRESOLVED",
+            }
+        ]
+    elif kind == "alternative":
+        data["configurations"].append({"config_id": "C2", "geometry_id": "G1"})
+        for layout in data["bar_layouts"]:
+            layout["config_id"] = "C2"
+    document = dumps_project(loads_project(json.dumps(data)))
+    response = client.post("/api/import", json={"document": document})
+    assert response.status_code == 200
+    assert response.json()["document"] == document
+    assert response.json()["geometries"][0]["has_reinforcement"] == (kind != "none")

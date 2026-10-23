@@ -182,3 +182,11 @@ cython_debug/
 
 # Local artifact previews (not part of the package)
 .qa/
+
+# Office lock files and compiled packages are not source files.
+~$*
+*.whl
+outputs/packages/
+
+# Automated browser runs; curated evidence in outputs/ui is kept separately.
+outputs/ui-runs/

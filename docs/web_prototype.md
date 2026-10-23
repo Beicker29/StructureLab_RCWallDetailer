@@ -1,4 +1,4 @@
-# RCWD-UI-000 — Prototipo web local
+# RCWD-UI-000R — Prototipo web local consolidado
 
 Implementado sobre el contrato `ProjectDefinition` 0.1.0, sin modificar dominio,
 validadores, motores existentes ni esquema. Interfaz en español con FastAPI, HTML,
@@ -16,7 +16,8 @@ Desde la raíz, con Python 3.11 o posterior y el entorno virtual creado:
 Abra **http://127.0.0.1:8000**. Detenga con Ctrl+C en la terminal.
 No hace falta Node, Excel, CAD ni compilar archivos estáticos. Linux/macOS:
 use `.venv/bin/python` con los mismos argumentos. No cambie la escucha a una interfaz
-pública: no hay autenticación ni soporte de despliegue público.
+pública: no hay autenticación ni soporte de despliegue público. Render continúa fuera
+de alcance; no se incorporan servicios ni archivos de despliegue.
 
 ## Flujo de uso
 
@@ -24,8 +25,13 @@ pública: no hay autenticación ni soporte de despliegue público.
    Los campos empiezan vacíos; el origen no se presupone. Use punto decimal.
    Se crea la definición geométrica; todavía no una sección con materiales ni un muro
    físico asignado a niveles. Las identidades necesarias son automáticas.
+   Si ya hay un proyecto, **Crear geometría** solicita confirmación antes de reemplazarlo.
+   Rechazar la confirmación, pulsar **Cancelar** o Escape conserva el proyecto y sus
+   entradas pendientes. Abrir el diálogo pausa la validación pendiente; al cancelarlo
+   puede continuar escribiendo, validar expresamente o descartar ese borrador.
 2. **Importar JSON**: seleccione un proyecto canónico V0.1. Se valida completo antes
-   de reemplazar el proyecto abierto. Un error deja intacto el documento anterior.
+   de reemplazar el proyecto abierto, con confirmación previa. Cancelar o importar
+   un archivo inválido conserva el documento y los textos pendientes del formulario.
 3. Elija una **geometría** y una **configuración** usando los selectores. No necesita
    escribir identificadores ni manejar las hojas Excel. Solo los rectángulos se dibujan
    y editan; otras entidades se conservan en el JSON.
@@ -42,6 +48,25 @@ pública: no hay autenticación ni soporte de despliegue público.
 Una geometría reutilizada se edita para todas las secciones que la referencian. Las
 barras y referencias mantienen sus coordenadas declaradas aunque se reduzca el muro;
 esta versión no evalúa contención o recubrimientos ni reacomoda refuerzo.
+La advertencia aparece sobre el editor cuando la geometría tiene declaraciones de
+refuerzo longitudinal o transversal, incluso en configuraciones alternativas. Permanece
+visible durante la edición y aclara que validar datos no aprueba el detallado estructural.
+
+### Cambios pendientes y cierre
+
+La interfaz diferencia un borrador pendiente de validar de una versión canónica sin
+exportar. Un proyecto nuevo queda pendiente de exportación; una importación válida se
+considera recuperable del archivo original. Una descarga iniciada marca únicamente la
+versión enviada a descargar. Un fallo de exportación o la descarga de una versión
+anterior no marca como guardada una edición más reciente ni un proyecto que la reemplazó.
+
+`beforeunload` se registra cuando hay cambios sin exportar o entradas pendientes, y se
+retira cuando se recupera la versión respaldada. Selección, zoom y desplazamiento no
+marcan el proyecto como modificado. La aplicación puede detectar que inició la descarga,
+pero no confirmar que el usuario la guardó en disco: compruebe el archivo descargado.
+El navegador decide cuándo mostrar el aviso de cierre y su texto; requiere interacción
+previa y puede omitirlo en algunos escenarios móviles. No reemplaza la exportación ni
+implementa guardado automático. Véase [beforeunload en MDN](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event).
 
 ## Estructura y transporte
 
@@ -51,7 +76,13 @@ src/rcwall_web/
   app.py            Composición, límites HTTP, errores y estáticos
   routes.py         Solicitudes de transporte estrictas
   services.py       Creación, edición y representación del proyecto
-  static/           index.html, style.css, app.js
+  static/
+    index.html      Estructura y textos de la interfaz
+    style.css       Estilos legibles, sin framework
+    app.js          Formularios, propiedades y coordinación
+    api.js          HTTP, errores y descarga del documento textual
+    state.js        Estado por pestaña, revisiones y versión respaldada
+    svg.js          Representación, selección y cámara SVG
 ```
 
 | Operación POST | Entrada JSON de transporte | Resultado |
@@ -66,18 +97,34 @@ texto opaco en JavaScript, evitando pérdida tanto de decimales como de enteros 
 Los datos visuales normalizados son desechables y nunca se envían como sustituto de
 la definición. Las etiquetas libres se muestran como texto literal. Límite de cuerpo
 HTTP: 2 MiB, incluido el envoltorio y el escape del documento.
+Los módulos son ES nativos servidos por FastAPI: no necesitan Node.js, bundler ni
+dependencias nuevas. La CSP no cambia. `has_reinforcement` es metadata de presentación
+del adaptador para la advertencia; no se agrega a `ProjectDefinition` ni al JSON exportado.
 
 ## Pruebas reproducibles y evidencia
 
-La base anterior se comprobó antes de modificar archivos: **165 pruebas aprobadas**.
+La base de RCWD-UI-000 se comprobó antes de modificar archivos: **198 pruebas aprobadas**,
+incluidas las dos pruebas de navegador originales.
 Las nuevas pruebas HTTP cubren creación, precisión, origen, edición, importación,
 exportación, errores del dominio, configuraciones alternativas, aislamiento, límites
 HTTP y texto no confiable.
 
-Comprobación de cierre (2026-10-23, Python 3.12): **198 pruebas aprobadas**
+Comprobación histórica de RCWD-UI-000 (2026-10-23, Python 3.12): **198 pruebas aprobadas**
 (165 anteriores + 31 HTTP/aplicación + 2 de navegador), Ruff check y format sin errores,
 y `pip check` sin dependencias rotas. Starlette 1.9 emite una advertencia de deprecación
 del transporte HTTPX de TestClient; las pruebas pasan y no se oculta la advertencia.
+
+Cierre local de RCWD-UI-000R: **212 pruebas aprobadas** (202 de Python/API y 10 de
+navegador Chromium), con Ruff check, Ruff format --check y pip check aprobados.
+La advertencia de deprecación HTTPX de Starlette sigue presente. Las pruebas nuevas
+cubren confirmación de reemplazo, cancelación por botón/Escape, conservación de
+borradores y proyectos ante errores, respuestas tardías, descarga de versiones antiguas,
+avisos de recarga, refuerzo asociado e independencia del núcleo. Se comprobó además
+aislamiento entre pestañas del mismo contexto y entre contextos de navegador.
+
+Las huellas de todos los archivos Python del núcleo, el esquema y ambos libros Excel
+coinciden con las de la inspección inicial. ADR-006 y las cinco capturas históricas
+permanecen intactos. No fue necesario adoptar una nueva decisión arquitectónica.
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest
@@ -85,20 +132,26 @@ del transporte HTTPX de TestClient; las pruebas pasan y no se oculta la adverten
 .\.venv\Scripts\python.exe -m ruff format --check .
 ```
 
-Para incluir las pruebas reales de navegador y regenerar las capturas:
+Para incluir las pruebas reales de navegador y conservar las capturas de la ejecución:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -e ".[dev,web,ui-test]"
 .\.venv\Scripts\python.exe -m playwright install chromium
 $env:RCWALL_BROWSER_TESTS = "1"
+$env:RCWALL_UI_OUTPUT = "outputs/ui-runs"
 .\.venv\Scripts\python.exe -m pytest
 Remove-Item Env:RCWALL_BROWSER_TESTS
+Remove-Item Env:RCWALL_UI_OUTPUT
 ```
 
 Las pruebas de navegador arrancan y detienen su propio servidor local en un puerto
-libre. No necesitan un servidor abierto en 8000. Sin la variable se omiten explícitamente.
+libre. No necesitan un servidor abierto en 8000. Sin `RCWALL_BROWSER_TESTS` se omiten
+explícitamente. Sin `RCWALL_UI_OUTPUT`, las capturas quedan en el directorio temporal de
+pytest. El destino `outputs/ui-runs/` está ignorado por Git; las pruebas rechazan escribir
+en `outputs/ui/`, que contiene únicamente evidencia seleccionada para documentación.
 Se ejecutaron con Chromium automatizado y se inspeccionaron sus capturas; no se afirma
-una comprobación manual en un navegador del usuario. Las capturas generadas incluyen:
+una comprobación manual en un navegador del usuario. Se conservan estas capturas históricas
+de RCWD-UI-000 porque ilustran comportamientos distintos, sin regenerarlas automáticamente:
 
 - [Contorno seleccionado](../outputs/ui/01-contorno.png).
 - [Rechazo de una dimensión inválida](../outputs/ui/02-validacion.png).
@@ -106,13 +159,49 @@ una comprobación manual en un navegador del usuario. Las capturas generadas inc
 - [Barra explícita y propiedades exactas](../outputs/ui/04-barra-explicita.png).
 - [Vista estrecha y texto importado literal](../outputs/ui/05-vista-estrecha.png).
 
+Evidencia seleccionada de RCWD-UI-000R:
+[advertencia geométrica con coordenadas de barras conservadas](../outputs/ui/06-advertencia-geometrica.png).
+
 Puede importar el [ejemplo con barras explícitas](../outputs/ui/ejemplo-barras.json),
-generado por la prueba de navegador, para explorar la selección y las propiedades.
+conservado como ejemplo estable, para explorar la selección y las propiedades. Las pruebas
+generan sus propias copias temporales y no sobrescriben este archivo.
 
 La prueba compara la descarga antes/después de zoom y desplazamiento, verifica dos
 contextos de navegador independientes y comprueba exportación exacta con cantidades
 mayores que 2^53 y decimales extensos. Los datos de barras son ejemplos de prueba,
 no recomendaciones estructurales.
+
+### Integración continua
+
+No había un workflow del proyecto. Se incorporan dos configuraciones mínimas:
+
+- `.github/workflows/ci.yml`: push, pull request o ejecución manual; instala `.[dev,web]`,
+  ejecuta pytest, Ruff check y Ruff format. El módulo Playwright se omite explícitamente.
+- `.github/workflows/browser.yml`: ejecución manual independiente; instala `.[dev,web,ui-test]`
+  y Chromium, habilita las pruebas de navegador y adjunta las capturas como artefactos
+  temporales de GitHub Actions. No publica la aplicación.
+
+Se ejecutaron las pruebas localmente; la ejecución hospedada de estos workflows queda
+pendiente de subir los cambios a GitHub. Configuración basada en la
+[guía de pruebas Python de GitHub](https://docs.github.com/en/actions/tutorials/build-and-test-code/python).
+
+### Limpieza y preservación de los Excel
+
+`~$plantilla_v0_1.xlsx` es un archivo de bloqueo de Office, y el `.whl` bajo
+`outputs/packages/` es una compilación. Se retiraron del índice conservando las copias
+locales; `.gitignore` excluye estos archivos y los resultados automáticos de navegador.
+La copia temporal de Excel estaba bloqueada por la aplicación y no se eliminó.
+
+Se compararon ambos libros con `8977403` (RCWD-001B). Sus modificaciones llegaron en
+`55f2a5d`, antes del prototipo web: tienen 17 hojas pero `Barras` fue renombrada como
+`BarrasVerticales`; se observaron 441 diferencias de valor/tipo en el ejemplo y 437 en
+la plantilla, además de cambios de formato. La plantilla contiene ahora datos del
+proyecto `EJ-MURO-CR-001`. No son cambios binarios accidentales demostrados: ambos libros
+se conservaron byte por byte, sin regenerar ni guardar con openpyxl.
+
+El lector Excel vigente requiere la hoja `Barras`, por lo que esos libros modificados
+no corresponden a su plantilla aprobada. Resolver esa divergencia queda pendiente de
+un alcance Excel específico; este hito no revierte el trabajo del usuario ni amplía el lector.
 
 ## Límites y recomendaciones para RCWD-UI-001
 
