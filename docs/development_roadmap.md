@@ -1,7 +1,7 @@
 # Hoja de ruta
 
 RCWD-000 establece la base aprobada. RCWD-001 se divide en contratos canónicos
-(RCWD-001A, implementado) e interfaz Excel (RCWD-001B, pendiente). La división RCWD-002
+(RCWD-001A, implementado) e interfaz Excel (RCWD-001B, implementado). La división RCWD-002
 a RCWD-006 es una propuesta de planificación: requiere aprobación de alcance y criterios
 detallados antes de implementar cada hito.
 
@@ -9,7 +9,7 @@ detallados antes de implementar cada hito.
 | --- | --- | --- | --- | --- |
 | RCWD-000 | Inicialización, arquitectura y entorno técnico | Ninguna | Paquete instalable e importable; documentación y ADR; pruebas y revisión estática iniciales | Base implementada |
 | RCWD-001A | Contratos canónicos V0.1 | RCWD-000 | Tipos y relaciones; sección/muro/materiales; patrones de entrada; polígonos; precisión; JSON, esquema y pruebas | Implementado: 115 pruebas pasan, incluidas diez originales; Ruff sin errores |
-| RCWD-001B | Plantilla e interfaz Excel V0.1 | RCWD-001A | Generación/lectura sincronizada con modelos; mapeo de secciones y muros; reportes hoja/fila/campo; ida/vuelta preservando unidades y decimales | Pendiente |
+| RCWD-001B | Plantilla e interfaz Excel V0.1 | RCWD-001A | Generación/lectura sincronizada con modelos; mapeo de secciones y muros; reportes hoja/fila/campo; ida/vuelta preservando unidades y decimales | Implementado: 17 hojas españolas, 50 pruebas Excel |
 | RCWD-002 | Representaciones y operaciones geométricas reutilizables | RCWD-001, decisiones de coordenadas y tolerancias | Casos geométricos admitidos documentados; operaciones deterministas probadas; rechazo de casos no soportados; independencia de Excel/CAD | Propuesto |
 | RCWD-003 | Resolución de refuerzo longitudinal | RCWD-001 y RCWD-002, políticas de distribución aprobadas | Patrones acordados producen una representación común; instrucciones preservadas; trazabilidad y pruebas de extremos/conflictos | Propuesto |
 | RCWD-004 | Resolución transversal y distribución vertical | RCWD-001 y RCWD-002; integración con RCWD-003 cuando aplique | Trayectorias y colocación Z verificables; parámetros explícitos de doblado/anclaje; ninguna geometría inferida sin regla aprobada | Propuesto |
@@ -51,3 +51,15 @@ WallDefinition y materiales. No se debe volver a usar config_id como sustituto d
 identidad de sección ni wall_id como identidad de sección. Las políticas textuales y
 los contratos UNRESOLVED deben conservar su estado explícito, sin valores por defecto
 de Excel que alteren el significado estructural.
+
+## Cierre de RCWD-001B
+
+Interfaz de 17 hojas aprobadas implementada exclusivamente en io/excel. Generador, lector,
+validación y diagnósticos reutilizan contratos 0.1.0 sin modificarlos. Secciones, muros,
+materiales y asignaciones tienen su mapeo explícito. Los decimales se almacenan como texto
+y el ciclo canónico sin modificaciones conserva exactamente su serialización.
+
+La revisión incluye 165 pruebas (115 previas + 50 Excel), Ruff y vistas de las hojas.
+La interacción nativa de Microsoft Excel no se ejecutó. Las políticas libres y los estados
+pendientes siguen sin resolución algorítmica; RCWD-002 y posteriores conservan sus puertas
+de aprobación y definición de alcance.

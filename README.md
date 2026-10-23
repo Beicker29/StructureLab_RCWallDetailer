@@ -9,7 +9,7 @@ El proyecto es independiente de DCCAD3, AutoCAD y formatos propietarios. Los con
 la resolución geométrica, las verificaciones normativas y la representación CAD mantienen
 responsabilidades separadas.
 
-## Estado real: RCWD-001A
+## Estado real: RCWD-001B
 
 Implementados los contratos canónicos V0.1 mediante Pydantic, geometrías rectangulares y
 poligonales con huecos, validación de tipos/referencias/topología, comparaciones acotadas
@@ -23,7 +23,10 @@ Los contratos transversales, de colocación vertical y de dibujo conservan decla
 con estado `UNRESOLVED`. `DetailingResult` es una envoltura reservada con estado
 `NOT_IMPLEMENTED`. La equivalencia física del refuerzo siempre se informa como indeterminada.
 
-Pendientes: Excel (RCWD-001B), posiciones calculadas de barras, motores de detallado,
+Implementada la interfaz Excel de 17 hojas visibles en español, con plantilla vacía,
+ejemplo diligenciado, exportación/importación y reportes de errores localizados.
+
+Pendientes: posiciones calculadas de barras, motores de detallado,
 transformaciones local/global, verificación normativa y exportación DXF. No existe CLI.
 La validación de datos no demuestra cumplimiento de una norma estructural.
 
@@ -48,9 +51,9 @@ Para instalar sin herramientas de desarrollo: `python -m pip install .`.
 
 La distribución se llama `structurelab-rcwalldetailer`; el paquete importable es
 `rcwall`. Las pruebas requieren instalar primero la distribución y no modifican
-PYTHONPATH. Pydantic 2 es la única dependencia directa de ejecución para contratos,
-validación local y JSON Schema. Setuptools construye el paquete; pytest y Ruff
-pertenecen al extra de desarrollo. No se incorporan dependencias Excel o CAD.
+PYTHONPATH. Pydantic 2 implementa contratos, validación local y JSON Schema; openpyxl 3.1
+implementa exclusivamente la frontera Excel. Setuptools construye el paquete; pytest y
+Ruff pertenecen al extra de desarrollo. No hay dependencias CAD.
 
 ## Uso de los contratos
 
@@ -100,7 +103,7 @@ src/rcwall/
   detailing/       Reservado para motores de resolución
   validation/      Tipos, referencias, geometría y equivalencia de definiciones
   io/json.py       Lectura/escritura JSON y generación de esquema
-  io/excel/        Reservado para RCWD-001B
+  io/excel/        Generador/lector español y diagnósticos por celda
   exporters/dxf/   Reservado para exportación
 tests/             Instalación, contratos, topología, equivalencia y JSON
 docs/              Especificaciones, convenciones y ADR
@@ -118,7 +121,8 @@ Decimal originales, sin epsilon global.
 - [Arquitectura y dependencias](docs/architecture.md).
 - [Requisitos aprobados y pendientes](docs/requirements.md).
 - [Contratos implementados y límites](docs/data_contracts.md).
-- [Interfaz Excel preliminar](docs/excel_interface.md).
+- [Interfaz Excel, columnas y uso](docs/excel_interface.md).
+- [Decisiones técnicas de Excel](docs/excel_decisions.md).
 - [Hoja de ruta](docs/development_roadmap.md).
 - [Convenciones](docs/conventions.md).
 - [ADR-001: independencia del dominio](docs/adr/ADR-001-domain-independence.md).
@@ -128,10 +132,37 @@ Decimal originales, sin epsilon global.
 - [ADR-005: coordenadas y precisión](docs/adr/ADR-005-coordinates-and-precision.md).
 - [Instrucciones para agentes](AGENTS.md).
 
-Validación realizada con Python 3.12: 115 pruebas aprobadas, incluidas las diez de
-RCWD-000; Ruff check y Ruff format --check sin errores. Esto verifica contratos y
+Validación con Python 3.12: se conservan las 115 pruebas anteriores y se incorporan
+50 pruebas Excel (165 en total). Ruff check y Ruff format --check sin errores. Esto verifica contratos y
 el subconjunto geométrico descrito, no un motor ni una comprobación normativa.
 
-RCWD-001B deberá adaptar las hojas preliminares a los contratos actuales, incluyendo
-secciones, materiales y muros físicos. Las políticas de distribución, la geometría
-transversal y las transformaciones permanecen delimitadas como trabajo posterior.
+El mapeo Excel incluye secciones, materiales y muros físicos sin cambiar el esquema 0.1.0.
+Las políticas de distribución, la geometría transversal y las transformaciones permanecen
+como trabajo posterior. No se verificó interacción manual en Microsoft Excel instalado.
+
+## Generar, editar y validar Excel
+
+```powershell
+.\.venv\Scripts\python.exe scripts/generate_excel_artifacts.py
+```
+
+Archivos estables: [plantilla vacía](examples/excel/plantilla_v0_1.xlsx) y
+[ejemplo diligenciado](examples/excel/ejemplo_v0_1.xlsx), generado del JSON existente.
+
+```python
+from rcwall.io.excel import export_project, inspect_workbook
+from rcwall.io.json import read_project, write_project
+
+export_project(read_project("examples/project_v0_1.json"), "entrada.xlsx")
+# Editar entrada.xlsx, conservando los decimales como texto.
+result = inspect_workbook("entrada.xlsx")
+print(result.report.to_dict())
+if result.project is not None:
+    write_project(result.project, "salida.json")
+```
+
+Encabezados en fila 6, datos desde fila 7. Las listas controladas están en español;
+los textos libres nunca se traducen. Decimales almacenados como números de Excel se
+rechazan para impedir pérdida de precisión. La plantilla vacía requiere diligenciar
+Proyecto antes de validarse como entrada. Consulte la documentación para ampliar
+las 200 filas inicialmente preparadas y para interpretar campos condicionales.

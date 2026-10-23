@@ -1,8 +1,8 @@
 # Arquitectura inicial
 
 Estado: arquitectura adoptada en RCWD-000 y conservada en RCWD-001A. Están implementados
-contratos, validación, predicados geométricos exactos y JSON. Excel, detallado y CAD
-permanecen reservados; el flujo completo descrito sigue siendo un objetivo.
+contratos, validación, predicados geométricos exactos, JSON e interfaz Excel (RCWD-001B).
+Detallado y CAD permanecen reservados; el flujo completo sigue siendo un objetivo.
 
 ## Responsabilidades y dependencias
 
@@ -58,14 +58,14 @@ superar controles de tipos, referencias o topología.
   Transformaciones local/global aplazadas; no hay epsilon global.
 - La geometría arbitraria es un objetivo conceptual; cada versión declarará qué
   representaciones acepta y rechazará de forma explícita las no soportadas.
-- Pydantic es la dependencia directa para contratos. Los predicados geométricos usan
+- Pydantic es la dependencia para contratos; openpyxl pertenece exclusivamente a io/excel. Los predicados geométricos usan
   Fraction de la biblioteca estándar a partir de los valores Decimal originales.
 
 ## Implementación RCWD-001A y preparación para RCWD-001B
 
 Los contratos viven en `domain/models.py`, los predicados en `geometry/polygons.py`,
 la validación en `validation/project.py`, la equivalencia de secciones en
-`validation/equivalence.py` y JSON en `io/json.py`. Excel seguirá en `io/excel`. La metadata de hoja/fila pertenece al adaptador y se traduce al reporte; no se
+`validation/equivalence.py` y JSON en `io/json.py`. Excel se implementa en `io/excel` con mapping, writer, reader y diagnostics. La metadata de hoja/fila pertenece al adaptador y se traduce al reporte; no se
 introduce una dependencia inversa del dominio al libro. El generador de plantilla deberá
 derivar o verificar su correspondencia con los contratos versionados.
 

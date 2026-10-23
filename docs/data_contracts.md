@@ -161,6 +161,13 @@ como strings. La positividad de esos strings, relaciones entre entidades y topol
 requieren la validación Python adicional. Cambios incompatibles requieren nueva versión
 de esquema. Es la primera versión publicada, sin esquemas previos que migrar.
 
+## Adaptación Excel RCWD-001B
+
+El contrato y el esquema 0.1.0 no se modifican. La interfaz usa 17 hojas en español,
+enumeraciones traducidas bidireccionalmente y decimales como texto. Los datos libres
+conservan contenido e idioma. Los errores de las rutas canónicas se traducen a celdas
+sin importar openpyxl desde el dominio. Véase [interfaz Excel](excel_interface.md).
+
 ## Equivalencia
 
 `geometry.polygons.geometrically_equivalent` compara regiones geométricas exactas en
