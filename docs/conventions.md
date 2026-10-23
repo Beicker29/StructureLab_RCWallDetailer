@@ -64,11 +64,13 @@ omitido es None, sin activar reglas de resolución implícitas.
 ## Versionado
 
 La versión del paquete reside en pyproject.toml. schema_version del proyecto es
-independiente y en esta primera publicación solo acepta 0.1.0. Que ambos números
-coincidan ahora no establece una dependencia entre ellos.
+independiente y solo acepta 0.1.0. El paquete 0.2.0 retira la API Excel, manteniendo
+el mismo esquema 0.1.0; ambas versiones no están vinculadas.
 
-Cambios incompatibles requieren nueva versión de esquema y decisión explícita sobre
-consumidores y migraciones. No se deduce la versión desde un nombre de archivo.
+Cambios incompatibles del contrato requieren nueva versión de esquema y decisión
+explícita sobre consumidores y migraciones. Los cambios incompatibles de una API de
+adaptador se reflejan en la versión del paquete y su documentación, sin migrar un
+contrato intacto. No se deduce la versión desde un nombre de archivo.
 No existen versiones anteriores publicadas ni migraciones implementadas.
 Las variantes usan discriminadores kind/pattern y rechazan claves desconocidas.
 

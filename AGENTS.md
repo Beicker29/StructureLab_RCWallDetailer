@@ -4,7 +4,9 @@
 
 Este proyecto desarrolla una herramienta independiente de detallado de secciones de muros
 de concreto reforzado. La base activa incluye RCWD-000, los contratos RCWD-001A,
-la interfaz Excel RCWD-001B y el prototipo web local RCWD-UI-000.
+el prototipo web local RCWD-UI-000R y el retiro RCWD-EXCEL-RETIRE-000.
+La web es la interfaz principal y JSON el formato de intercambio. RCWD-001B es histórico;
+el adaptador Excel fue retirado del paquete 0.2.0, sin cambiar el esquema canónico 0.1.0.
 Leer `README.md` y
 `docs/development_roadmap.md` antes de ampliar funcionalidades. Los directorios reservados
 no implican que sus motores estén implementados.

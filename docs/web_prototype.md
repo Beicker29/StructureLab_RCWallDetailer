@@ -185,7 +185,12 @@ Se ejecutaron las pruebas localmente; la ejecución hospedada de estos workflows
 pendiente de subir los cambios a GitHub. Configuración basada en la
 [guía de pruebas Python de GitHub](https://docs.github.com/en/actions/tutorials/build-and-test-code/python).
 
-### Limpieza y preservación de los Excel
+### Limpieza y preservación de los Excel (histórico de RCWD-UI-000R)
+
+Este registro describe el estado previo al retiro. RCWD-EXCEL-RETIRE-000 eliminó los
+libros y el adaptador tras comprobar su respaldo en Git y confirmar que no había
+ediciones pendientes. La divergencia descrita abajo se cerró por retiro, sin cambiar
+el lector. Véase [ADR-007](adr/ADR-007-retire-excel.md).
 
 `~$plantilla_v0_1.xlsx` es un archivo de bloqueo de Office, y el `.whl` bajo
 `outputs/packages/` es una compilación. Se retiraron del índice conservando las copias
@@ -199,9 +204,9 @@ la plantilla, además de cambios de formato. La plantilla contiene ahora datos d
 proyecto `EJ-MURO-CR-001`. No son cambios binarios accidentales demostrados: ambos libros
 se conservaron byte por byte, sin regenerar ni guardar con openpyxl.
 
-El lector Excel vigente requiere la hoja `Barras`, por lo que esos libros modificados
-no corresponden a su plantilla aprobada. Resolver esa divergencia queda pendiente de
-un alcance Excel específico; este hito no revierte el trabajo del usuario ni amplía el lector.
+El lector Excel entonces vigente requería la hoja `Barras`, por lo que esos libros
+modificados no correspondían a su plantilla aprobada. La divergencia quedó pendiente
+en RCWD-UI-000R, que no revirtió el trabajo del usuario ni amplió el lector.
 
 ## Límites y recomendaciones para RCWD-UI-001
 
@@ -233,3 +238,7 @@ Propuestas para RCWD-UI-001, pendientes de aprobación de alcance:
    decidir almacenamiento o validación incremental.
 
 Decisión arquitectónica completa: [ADR-006](adr/ADR-006-local-web-prototype.md).
+
+Desde el paquete 0.2.0, la web es la interfaz principal y JSON es el formato de
+intercambio. El retiro de Excel no modifica esta implementación, sus límites ni el
+contrato 0.1.0. Véase [verificación del retiro](excel_retirement.md).

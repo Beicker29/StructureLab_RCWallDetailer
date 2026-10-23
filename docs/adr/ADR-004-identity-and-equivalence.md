@@ -4,6 +4,10 @@ Estado: adoptado e implementado en el subconjunto RCWD-001A. Fecha: 2026-10-23.
 Resuelve identidad y comparaciones pendientes de ADR-002/003; no sustituye su separación
 entre definiciones y resultados.
 
+Evolución: [ADR-007](ADR-007-retire-excel.md) retira el adaptador Excel.
+Sus compromisos de mapeo son históricos; las decisiones de identidad y equivalencia
+de este ADR permanecen vigentes sin cambios de contrato.
+
 ## Problema
 
 La identidad del muro físico no puede confundirse con la de una sección reforzada.

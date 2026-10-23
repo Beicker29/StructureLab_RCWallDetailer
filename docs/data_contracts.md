@@ -134,7 +134,8 @@ de campos e índices desde cero, code y description. Ejemplo:
 `("assignments", 0, "section_id")`, código `missing_reference`.
 Los discriminadores pueden aparecer en rutas de errores Pydantic. Los códigos locales
 de Pydantic pueden variar entre versiones de esa biblioteca; los códigos de referencias
-y geometría pertenecen a RCWall. El adaptador Excel deberá traducir rutas a hoja/fila/campo.
+y geometría pertenecen a RCWall. La web presenta los diagnósticos del backend;
+la traducción a hoja/fila/campo pertenecía al adaptador Excel retirado.
 
 El modelo es inmutable y usa tuplas para colecciones. No puede aceptarse un modelo
 solo porque su constructor pasó: las relaciones y topología requieren la entrada completa.
@@ -161,12 +162,12 @@ como strings. La positividad de esos strings, relaciones entre entidades y topol
 requieren la validación Python adicional. Cambios incompatibles requieren nueva versión
 de esquema. Es la primera versión publicada, sin esquemas previos que migrar.
 
-## Adaptación Excel RCWD-001B
+## Adaptación Excel RCWD-001B (histórica, retirada)
 
-El contrato y el esquema 0.1.0 no se modifican. La interfaz usa 17 hojas en español,
-enumeraciones traducidas bidireccionalmente y decimales como texto. Los datos libres
-conservan contenido e idioma. Los errores de las rutas canónicas se traducen a celdas
-sin importar openpyxl desde el dominio. Véase [interfaz Excel](excel_interface.md).
+RCWD-001B utilizó 17 hojas en español, enumeraciones traducidas y decimales como texto,
+sin modificar el contrato ni importar openpyxl desde el dominio. El adaptador fue
+retirado del paquete 0.2.0; el contrato y esquema 0.1.0 permanecen intactos.
+Véanse el [registro histórico](excel_interface.md) y [ADR-007](adr/ADR-007-retire-excel.md).
 
 ## Equivalencia
 

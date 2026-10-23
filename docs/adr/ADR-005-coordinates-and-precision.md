@@ -4,6 +4,10 @@ Estado: adoptado e implementado para RCWD-001A. Fecha: 2026-10-23.
 Resuelve las convenciones locales y de precisión que RCWD-000 dejó pendientes.
 GEO-04 y tolerancias de futuros cálculos aproximados siguen aplazados.
 
+Evolución: [ADR-007](ADR-007-retire-excel.md) retira el adaptador Excel.
+Sus referencias a hojas/celdas son históricas; las decisiones de coordenadas,
+precisión decimal y serialización JSON permanecen vigentes.
+
 ## Problema
 
 La representación canónica debe conservar valores declarados y orientar contornos de

@@ -1,15 +1,15 @@
 # StructureLab RCWallDetailer
 
 Herramienta de ingeniería en desarrollo para el detallado de secciones de muros de
-concreto reforzado. El flujo previsto recibe definiciones desde Excel, utiliza contratos
-canónicos versionados y serializables a JSON, resuelve geometría de refuerzo y exporta
-detalles editables inicialmente a DXF.
+concreto reforzado. La entrada principal es la aplicación web local FastAPI y los
+proyectos se intercambian mediante JSON canónico versionado. La resolución de refuerzo
+y la exportación de detalles editables a DXF siguen siendo objetivos futuros.
 
 El proyecto es independiente de DCCAD3, AutoCAD y formatos propietarios. Los contratos,
 la resolución geométrica, las verificaciones normativas y la representación CAD mantienen
 responsabilidades separadas.
 
-## Estado real: RCWD-UI-000R
+## Estado real: RCWD-EXCEL-RETIRE-000
 
 Implementados los contratos canónicos V0.1 mediante Pydantic, geometrías rectangulares y
 poligonales con huecos, validación de tipos/referencias/topología, comparaciones acotadas
@@ -23,8 +23,13 @@ Los contratos transversales, de colocación vertical y de dibujo conservan decla
 con estado `UNRESOLVED`. `DetailingResult` es una envoltura reservada con estado
 `NOT_IMPLEMENTED`. La equivalencia física del refuerzo siempre se informa como indeterminada.
 
-Implementada la interfaz Excel de 17 hojas visibles en español, con plantilla vacía,
-ejemplo diligenciado, exportación/importación y reportes de errores localizados.
+El paquete **0.2.0** retira la API `rcwall.io.excel`, sus plantillas y generador.
+Excel ya no forma parte del producto. El contrato canónico sigue en **0.1.0**, sin
+migraciones de datos. Véase [ADR-007](docs/adr/ADR-007-retire-excel.md).
+
+Cierre del retiro: **162 pruebas aprobadas**, incluidas 10 de navegador, ejecutadas
+contra la distribución instalada en un entorno limpio sin `openpyxl`. Ruff check,
+format y pip check aprobados. [Inventario y verificación](docs/excel_retirement.md).
 
 Implementado el prototipo web local para crear/importar geometrías rectangulares,
 editar dimensiones, visualizar barras explícitas y seleccionar, ampliar y desplazar la
@@ -90,7 +95,7 @@ Abra **http://127.0.0.1:8000**. Consulte la [guía web](docs/web_prototype.md) p
 pruebas de navegador, capturas, alcance y limitaciones. El proyecto vive en cada pestaña;
 exporte el JSON antes de cerrar o recargar. No se guardan proyectos en el servidor.
 
-Cierre RCWD-UI-000: **198 pruebas aprobadas** al habilitar las pruebas de navegador
+Cierre histórico RCWD-UI-000: **198 pruebas aprobadas** al habilitar las pruebas de navegador
 (165 previas, 31 web y 2 de navegador). Ruff check y format sin errores.
 
 RCWD-UI-000R consolida las confirmaciones de reemplazo, conserva borradores al cancelar,
@@ -104,9 +109,9 @@ primera ejecución en GitHub queda pendiente de subir los cambios.
 
 La distribución se llama `structurelab-rcwalldetailer`; el paquete importable es
 `rcwall`. Las pruebas requieren instalar primero la distribución y no modifican
-PYTHONPATH. Pydantic 2 implementa contratos, validación local y JSON Schema; openpyxl 3.1
-implementa exclusivamente la frontera Excel. Setuptools construye el paquete; pytest y
-Ruff pertenecen al extra de desarrollo. No hay dependencias CAD.
+PYTHONPATH. Pydantic 2 implementa contratos, validación local y JSON Schema.
+FastAPI y Uvicorn pertenecen al extra web. Setuptools construye el paquete; pytest y
+Ruff pertenecen al extra de desarrollo. No hay dependencias Excel ni CAD.
 
 ## Uso de los contratos
 
@@ -156,7 +161,6 @@ src/rcwall/
   detailing/       Reservado para motores de resolución
   validation/      Tipos, referencias, geometría y equivalencia de definiciones
   io/json.py       Lectura/escritura JSON y generación de esquema
-  io/excel/        Generador/lector español y diagnósticos por celda
   exporters/dxf/   Reservado para exportación
 src/rcwall_web/    Adaptador web local, separado del núcleo; FastAPI y SVG
 tests/             Instalación, contratos, topología, equivalencia y JSON
@@ -175,8 +179,9 @@ Decimal originales, sin epsilon global.
 - [Arquitectura y dependencias](docs/architecture.md).
 - [Requisitos aprobados y pendientes](docs/requirements.md).
 - [Contratos implementados y límites](docs/data_contracts.md).
-- [Interfaz Excel, columnas y uso](docs/excel_interface.md).
-- [Decisiones técnicas de Excel](docs/excel_decisions.md).
+- [Registro histórico de la interfaz Excel retirada](docs/excel_interface.md).
+- [Decisiones históricas de Excel](docs/excel_decisions.md).
+- [ADR-007: retiro de Excel y compatibilidad](docs/adr/ADR-007-retire-excel.md).
 - [Prototipo web, ejecución y evidencia visual](docs/web_prototype.md).
 - [ADR-006: interfaz local y precisión](docs/adr/ADR-006-local-web-prototype.md).
 - [Hoja de ruta](docs/development_roadmap.md).
@@ -188,44 +193,18 @@ Decimal originales, sin epsilon global.
 - [ADR-005: coordenadas y precisión](docs/adr/ADR-005-coordinates-and-precision.md).
 - [Instrucciones para agentes](AGENTS.md).
 
-Validación histórica de RCWD-001B con Python 3.12: se conservan las 115 pruebas anteriores y se incorporan
+Validación histórica de RCWD-001B con Python 3.12: se conservaron las 115 pruebas anteriores y se incorporaron
 50 pruebas Excel (165 en total). Ruff check y Ruff format --check sin errores. Esto verifica contratos y
 el subconjunto geométrico descrito, no un motor ni una comprobación normativa.
 
-El mapeo Excel incluye secciones, materiales y muros físicos sin cambiar el esquema 0.1.0.
-Las políticas de distribución, la geometría transversal y las transformaciones permanecen
-como trabajo posterior. No se verificó interacción manual en Microsoft Excel instalado.
+## Retiro de Excel y compatibilidad
 
-## Generar, editar y validar Excel
+`rcwall.io.excel`, su generador y sus libros ya no se distribuyen. Las llamadas a esa
+API deben reemplazarse por el flujo web o por `rcwall.io.json` para archivos JSON;
+la API JSON no lee XLSX. Los JSON V0.1 existentes siguen siendo compatibles sin migración.
+No se implementa conversión automática de libros ni otro formato tabular.
 
-```powershell
-.\.venv\Scripts\python.exe scripts/generate_excel_artifacts.py
-```
-
-Archivos versionados: [plantilla](examples/excel/plantilla_v0_1.xlsx) y
-[ejemplo diligenciado](examples/excel/ejemplo_v0_1.xlsx). El generador crea una plantilla
-vacía y un ejemplo a partir del JSON existente.
-
-**Estado de las copias versionadas:** estos dos libros fueron editados posteriormente;
-la plantilla contiene datos y la hoja `Barras` se renombró como `BarrasVerticales`.
-Se conservaron esas modificaciones durante RCWD-UI-000R. El lector actual exige `Barras`;
-consulte la [comparación registrada](docs/web_prototype.md#limpieza-y-preservación-de-los-excel).
-El comando de regeneración sobrescribe ambos libros: conserve sus datos antes de usarlo.
-
-```python
-from rcwall.io.excel import export_project, inspect_workbook
-from rcwall.io.json import read_project, write_project
-
-export_project(read_project("examples/project_v0_1.json"), "entrada.xlsx")
-# Editar entrada.xlsx, conservando los decimales como texto.
-result = inspect_workbook("entrada.xlsx")
-print(result.report.to_dict())
-if result.project is not None:
-    write_project(result.project, "salida.json")
-```
-
-Encabezados en fila 6, datos desde fila 7. Las listas controladas están en español;
-los textos libres nunca se traducen. Decimales almacenados como números de Excel se
-rechazan para impedir pérdida de precisión. La plantilla vacía requiere diligenciar
-Proyecto antes de validarse como entrada. Consulte la documentación para ampliar
-las 200 filas inicialmente preparadas y para interpretar campos condicionales.
+RCWD-001B y las modificaciones de sus libros se conservan en Git; la documentación
+Excel está marcada como histórica. Los modelos, el esquema, las relaciones y la
+serialización decimal exacta permanecen intactos. Consulte el
+[informe de retiro y verificación](docs/excel_retirement.md).

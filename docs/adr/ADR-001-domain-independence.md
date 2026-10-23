@@ -2,6 +2,10 @@
 
 Estado: adoptado para RCWD-000. Fecha: 2026-10-23.
 
+Evolución: [ADR-007](ADR-007-retire-excel.md) retira Excel del producto activo.
+Las menciones a ese adaptador se conservan como antecedentes; la independencia
+del dominio permanece vigente.
+
 ## Problema
 
 El proyecto debe interpretar secciones y refuerzo sin convertir las limitaciones de una

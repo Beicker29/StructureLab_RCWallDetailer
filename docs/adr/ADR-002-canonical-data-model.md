@@ -2,6 +2,10 @@
 
 Estado: adoptado para RCWD-000. Fecha: 2026-10-23.
 
+Evolución: [ADR-007](ADR-007-retire-excel.md) sustituye Excel por la web como entrada
+principal. Las menciones operativas a Excel son históricas; el contrato canónico
+V0.1 y la separación entre entrada y resultados permanecen vigentes.
+
 ## Problema
 
 Excel es una interfaz de ingreso, pero sus filas, formatos y hojas no bastan para definir

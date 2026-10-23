@@ -1,6 +1,9 @@
 # Decisiones técnicas de RCWD-001B
 
-Estado: implementado. El contrato canónico 0.1.0 y su JSON Schema no se modifican.
+**Registro histórico, no operativo.** El adaptador fue retirado en el paquete 0.2.0
+por [ADR-007](adr/ADR-007-retire-excel.md). Las decisiones siguientes describen la
+implementación anterior, conservada en Git; no implican funcionalidades vigentes.
+El contrato canónico 0.1.0 y su JSON Schema no se modifican.
 
 - **Frontera:** openpyxl se incorpora exclusivamente como dependencia del adaptador.
   Modelos, predicados y validación canónica se reutilizan sin introducir reglas estructurales.

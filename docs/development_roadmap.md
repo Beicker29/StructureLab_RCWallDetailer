@@ -1,7 +1,7 @@
 # Hoja de ruta
 
 RCWD-000 establece la base aprobada. RCWD-001 se divide en contratos canónicos
-(RCWD-001A, implementado) e interfaz Excel (RCWD-001B, implementado). La división RCWD-002
+(RCWD-001A, implementado) e interfaz Excel (RCWD-001B, histórico y retirado). La división RCWD-002
 a RCWD-006 es una propuesta de planificación: requiere aprobación de alcance y criterios
 detallados antes de implementar cada hito.
 
@@ -9,7 +9,7 @@ detallados antes de implementar cada hito.
 | --- | --- | --- | --- | --- |
 | RCWD-000 | Inicialización, arquitectura y entorno técnico | Ninguna | Paquete instalable e importable; documentación y ADR; pruebas y revisión estática iniciales | Base implementada |
 | RCWD-001A | Contratos canónicos V0.1 | RCWD-000 | Tipos y relaciones; sección/muro/materiales; patrones de entrada; polígonos; precisión; JSON, esquema y pruebas | Implementado: 115 pruebas pasan, incluidas diez originales; Ruff sin errores |
-| RCWD-001B | Plantilla e interfaz Excel V0.1 | RCWD-001A | Generación/lectura sincronizada con modelos; mapeo de secciones y muros; reportes hoja/fila/campo; ida/vuelta preservando unidades y decimales | Implementado: 17 hojas españolas, 50 pruebas Excel |
+| RCWD-001B | Plantilla e interfaz Excel V0.1 | RCWD-001A | Generación/lectura sincronizada con modelos; mapeo de secciones y muros; reportes hoja/fila/campo; ida/vuelta preservando unidades y decimales | Histórico: retirado en RCWD-EXCEL-RETIRE-000 |
 | RCWD-002 | Representaciones y operaciones geométricas reutilizables | RCWD-001, decisiones de coordenadas y tolerancias | Casos geométricos admitidos documentados; operaciones deterministas probadas; rechazo de casos no soportados; independencia de Excel/CAD | Propuesto |
 | RCWD-003 | Resolución de refuerzo longitudinal | RCWD-001 y RCWD-002, políticas de distribución aprobadas | Patrones acordados producen una representación común; instrucciones preservadas; trazabilidad y pruebas de extremos/conflictos | Propuesto |
 | RCWD-004 | Resolución transversal y distribución vertical | RCWD-001 y RCWD-002; integración con RCWD-003 cuando aplique | Trayectorias y colocación Z verificables; parámetros explícitos de doblado/anclaje; ninguna geometría inferida sin regla aprobada | Propuesto |
@@ -32,6 +32,11 @@ programarlas se requiere definir norma, edición, jurisdicción, entradas y alca
 asignarles un hito o alcance aprobado independiente. Tampoco se incluyen una interfaz
 gráfica dentro de esos hitos, integración con AutoCAD ni formatos CAD adicionales.
 RCWD-UI-000 es un alcance independiente aprobado posteriormente para el prototipo web local.
+
+## Cierres históricos
+
+Los cierres siguientes registran lo aprobado en cada hito. Las instrucciones relativas
+a Excel dejaron de estar vigentes con RCWD-EXCEL-RETIRE-000; se conservan como historial.
 
 ## Cierre de RCWD-000
 
@@ -94,3 +99,18 @@ Cierre verificado localmente: 212 pruebas aprobadas (10 de navegador), Ruff chec
 Ruff format --check y pip check aprobados. Los workflows están preparados; su ejecución
 en GitHub no se declara realizada. Continúa la advertencia de deprecación de HTTPX
 en el TestClient de Starlette, sin fallos de prueba.
+
+## RCWD-EXCEL-RETIRE-000 — Retiro del adaptador Excel
+
+La web local pasa a ser la interfaz principal; JSON conserva el intercambio completo
+de proyectos. Se retiran el adaptador, generador, libros, pruebas exclusivas y openpyxl.
+La API pública Excel deja de existir desde el paquete 0.2.0. El contrato canónico
+y su esquema permanecen en 0.1.0, sin migración ni cambios de motores o de la web.
+
+Se conservan los ADR y documentos históricos de RCWD-001B. La divergencia histórica
+`BarrasVerticales`/`Barras` se cierra por retiro del adaptador, no por una corrección
+del lector. No se sustituye Excel por otro formato tabular. RCWD-UI-001 y los motores
+futuros mantienen sus límites y requieren definición de alcance.
+
+Véanse [ADR-007](adr/ADR-007-retire-excel.md) e
+[informe de retiro y verificación](excel_retirement.md).

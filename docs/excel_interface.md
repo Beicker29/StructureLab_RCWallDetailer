@@ -1,6 +1,12 @@
-# Interfaz Excel V0.1 en español
+# Registro histórico — Interfaz Excel V0.1 en español (retirada)
 
-Estado: implementado en RCWD-001B con openpyxl. El esquema canónico 0.1.0 permanece intacto.
+**No vigente desde el paquete 0.2.0.** RCWD-EXCEL-RETIRE-000 retiró el adaptador,
+los libros y sus comandos. El contenido siguiente describe RCWD-001B exclusivamente
+como registro histórico; sus ejemplos no se ejecutan en la versión actual.
+Consulte [ADR-007](adr/ADR-007-retire-excel.md) y la [interfaz web vigente](web_prototype.md).
+
+Estado histórico: implementado en RCWD-001B con openpyxl y posteriormente retirado.
+El esquema canónico 0.1.0 permanece intacto.
 Hay exactamente 17 hojas visibles: once principales y seis avanzadas. No hay hojas ocultas,
 macros, fórmulas calculadas ni hoja Trayectorias.
 

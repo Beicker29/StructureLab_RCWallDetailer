@@ -1,24 +1,26 @@
 # Requisitos y estado
 
 RCWD-000 estableció la arquitectura. RCWD-001A implementa el contrato canónico y
-su subconjunto de validación. RCWD-001B implementa la interfaz Excel de 17 hojas en español; los motores posteriores
-no están implementados. La aprobación de un requisito no equivale a su ejecución completa.
+su subconjunto de validación. RCWD-001B es histórico: su interfaz Excel se retiró en
+RCWD-EXCEL-RETIRE-000. La web es la entrada principal y JSON el intercambio de proyectos.
+Los motores posteriores no están implementados. La aprobación de un requisito no equivale a su ejecución completa.
 
 ## Requisitos funcionales aprobados
 
 | ID | Requisito | Estado |
 | --- | --- | --- |
-| RF-01 | Ingreso inicial por Excel | Implementado RCWD-001B con openpyxl |
+| RF-01 | Ingreso inicial por Excel | Retirado; antecedente RCWD-001B, sustituido por RF-12 |
 | RF-02 | Contratos tipados, versionados y serializables a JSON | Implementado V0.1 |
 | RF-03 | Separar entrada y resultados | Entradas implementadas; resultado reservado NOT_IMPLEMENTED |
 | RF-04 | Geometrías arbitrarias mediante implementación progresiva | Rectángulos y polígonos simples con huecos; curvas/múltiples exteriores pendientes |
 | RF-05 | Refuerzo paramétrico y explícito | Tres patrones de entrada validados; sin resolución |
 | RF-06 | Representación geométrica común del refuerzo resuelto | Pendiente |
 | RF-07 | DXF editable y futuras integraciones | Pendiente |
-| RF-08 | Diagnósticos de tipos, referencias y geometría | Implementados con stage/path/code/description; ubicación Excel implementada |
-| RF-09 | Once hojas principales y seis avanzadas, todas en español | Implementadas según aprobación RCWD-001B |
+| RF-08 | Diagnósticos de tipos, referencias y geometría | Implementados con stage/path/code/description; presentados por la web |
+| RF-09 | Once hojas principales y seis avanzadas, todas en español | Histórico RCWD-001B; retirado junto al adaptador |
 | RF-10 | Configuraciones reutilizables, secciones con materiales y muros independientes | Implementado |
 | RF-11 | Asignación de secciones a múltiples muros/niveles | Implementado; un par muro/nivel no admite asignaciones ambiguas |
+| RF-12 | Web local como entrada principal; intercambio JSON V0.1 | Implementado: geometría rectangular, visualización y ciclo JSON; alcance delimitado al final de este documento |
 
 ## Decisiones aprobadas en RCWD-001A
 
@@ -44,8 +46,9 @@ La equivalencia transversal permanece indeterminada mientras sus contratos sean 
 - Python 3.11+, paquete instalable src/rcwall; arquitectura y dirección de dependencias
   de RCWD-000 conservadas.
 - Dominio independiente de Excel, bibliotecas CAD y geometría operativa.
-- Pydantic y openpyxl son dependencias directas de ejecución. Se justificó para contratos,
-  condiciones locales y esquema; openpyxl para el adaptador Excel. Predicados con biblioteca estándar.
+- Pydantic es la dependencia directa del núcleo para contratos, condiciones locales y esquema.
+  FastAPI/Uvicorn son dependencias opcionales del adaptador web. Predicados con biblioteca estándar.
+  El paquete no requiere openpyxl desde 0.2.0; véase [ADR-007](adr/ADR-007-retire-excel.md).
 - Pruebas automatizadas, Ruff y artefactos de esquema sincronizados con modelos.
 - Esquema versionado independientemente del paquete; rechazo de versiones no admitidas.
 - No usar DCCAD3 como referencia técnica, algoritmo, formato o convención.
@@ -69,7 +72,7 @@ La equivalencia transversal permanece indeterminada mientras sus contratos sean 
 | DP-09 | Norma, jurisdicción, edición, alcance y verificación normativa pendientes |
 | DP-10 | Dibujo UNRESOLVED; capas, bloques, catálogo de plantillas y exportación pendientes |
 | DP-11 | Alcances detallados RCWD-002 a RCWD-006 requieren aprobación |
-| DP-12 | Resuelto: 17 hojas, secciones/materiales/muros independientes; ver excel_interface.md |
+| DP-12 | Histórico: mapeo de 17 hojas retirado; no se mantiene un formato tabular sustituto |
 | DP-13 | Catálogos de niveles, subdivisión de muro/nivel y materiales diferenciados por grupo pendientes |
 
 Los límites no se completan con supuestos: estados UNRESOLVED, errores explícitos o
