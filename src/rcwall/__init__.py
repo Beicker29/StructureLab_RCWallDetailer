@@ -1,1 +1,1 @@
-"""StructureLab RCWallDetailer: architecture scaffold for reinforced concrete walls."""
+"""StructureLab RCWallDetailer: canonical input contracts for reinforced concrete walls."""

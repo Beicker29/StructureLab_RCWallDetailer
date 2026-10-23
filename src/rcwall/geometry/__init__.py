@@ -1,1 +1,1 @@
-"""Reserved for geometric representations and operations independent of file formats."""
+"""Exact polygon predicates and local geometric equivalence, independent of file formats."""

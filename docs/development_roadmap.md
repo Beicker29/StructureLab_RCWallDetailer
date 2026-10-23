@@ -1,14 +1,15 @@
 # Hoja de ruta
 
-RCWD-000 establece la base aprobada. RCWD-001 tiene una solicitud de alcance separada,
-cuya implementación se retomará después de esta inicialización. La división RCWD-002
+RCWD-000 establece la base aprobada. RCWD-001 se divide en contratos canónicos
+(RCWD-001A, implementado) e interfaz Excel (RCWD-001B, pendiente). La división RCWD-002
 a RCWD-006 es una propuesta de planificación: requiere aprobación de alcance y criterios
 detallados antes de implementar cada hito.
 
 | Hito | Objetivo | Dependencias | Criterios generales de aceptación | Estado |
 | --- | --- | --- | --- | --- |
 | RCWD-000 | Inicialización, arquitectura y entorno técnico | Ninguna | Paquete instalable e importable; documentación y ADR; pruebas y revisión estática iniciales | Base implementada |
-| RCWD-001 | Contratos canónicos y plantilla Excel V0.1 | RCWD-000 | Modelos tipados; plantilla programática; lectura; validaciones de tipos, referencias y polígonos; JSON reproducible y versionado; esquema, ejemplo, diagnósticos localizables y pruebas | Pendiente de retomar |
+| RCWD-001A | Contratos canónicos V0.1 | RCWD-000 | Tipos y relaciones; sección/muro/materiales; patrones de entrada; polígonos; precisión; JSON, esquema y pruebas | Implementado: 115 pruebas pasan, incluidas diez originales; Ruff sin errores |
+| RCWD-001B | Plantilla e interfaz Excel V0.1 | RCWD-001A | Generación/lectura sincronizada con modelos; mapeo de secciones y muros; reportes hoja/fila/campo; ida/vuelta preservando unidades y decimales | Pendiente |
 | RCWD-002 | Representaciones y operaciones geométricas reutilizables | RCWD-001, decisiones de coordenadas y tolerancias | Casos geométricos admitidos documentados; operaciones deterministas probadas; rechazo de casos no soportados; independencia de Excel/CAD | Propuesto |
 | RCWD-003 | Resolución de refuerzo longitudinal | RCWD-001 y RCWD-002, políticas de distribución aprobadas | Patrones acordados producen una representación común; instrucciones preservadas; trazabilidad y pruebas de extremos/conflictos | Propuesto |
 | RCWD-004 | Resolución transversal y distribución vertical | RCWD-001 y RCWD-002; integración con RCWD-003 cuando aplique | Trayectorias y colocación Z verificables; parámetros explícitos de doblado/anclaje; ninguna geometría inferida sin regla aprobada | Propuesto |
@@ -37,3 +38,16 @@ La estructura debe permitir comenzar RCWD-001 en `domain`, `validation`, `geomet
 e `io/excel` sin renombrar el paquete ni mover responsabilidades entre adaptadores y
 dominio. Los borradores de una implementación interrumpida no constituyen aceptación
 de RCWD-001 y deben revisarse antes de cualquier reutilización.
+
+## Cierre de RCWD-001A
+
+Se conservó la arquitectura y se incorporó Pydantic como única dependencia directa de
+ejecución. Contratos inmutables, JSON y validación completa están implementados; el
+dominio no importa adaptadores ni operaciones geométricas. La equivalencia geométrica
+cubre el mismo marco local; la equivalencia física del refuerzo no está implementada.
+
+Para RCWD-001B, el diseño preliminar de hojas debe resolver el mapeo de SectionDefinition,
+WallDefinition y materiales. No se debe volver a usar config_id como sustituto de la
+identidad de sección ni wall_id como identidad de sección. Las políticas textuales y
+los contratos UNRESOLVED deben conservar su estado explícito, sin valores por defecto
+de Excel que alteren el significado estructural.

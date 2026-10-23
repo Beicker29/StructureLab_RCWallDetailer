@@ -3,7 +3,8 @@
 ## Alcance y estado
 
 Este proyecto desarrolla una herramienta independiente de detallado de secciones de muros
-de concreto reforzado. La base activa corresponde a RCWD-000. Leer `README.md` y
+de concreto reforzado. La base activa incluye RCWD-000 y los contratos RCWD-001A.
+Leer `README.md` y
 `docs/development_roadmap.md` antes de ampliar funcionalidades. Los directorios reservados
 no implican que sus motores estén implementados.
 

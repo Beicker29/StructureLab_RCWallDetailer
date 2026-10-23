@@ -31,7 +31,7 @@ Las hojas avanzadas podrán permanecer vacías cuando no sean necesarias. El lec
 deberá confundir una hoja vacía válida con la ausencia de información requerida por
 una variante seleccionada.
 
-## Trabajo de RCWD-001
+## Trabajo pendiente de RCWD-001B
 
 La solicitud de RCWD-001 proporciona candidatos de columnas. Al retomarla se comprobará
 su correspondencia con los modelos y se documentarán campos obligatorios, opcionales y
@@ -49,3 +49,19 @@ No se establecen todavía números de fila, rangos de edición, tolerancias o co
 
 Los cambios de nombres de hojas o columnas deberán evaluarse como cambios de la interfaz,
 con compatibilidad explícita respecto de las versiones de contrato que soporten.
+
+## Ajuste requerido después de RCWD-001A
+
+El contrato canónico ya distingue GeometryDefinition, ReinforcementConfiguration,
+SectionDefinition (con materiales) y WallDefinition. SectionAssignment referencia
+section_id, wall_id y level_id. El diseño inicial de nueve hojas no representa todavía
+explícitamente todas esas entidades. RCWD-001B deberá definir y documentar su mapeo
+sin duplicar configuraciones ni equiparar muro con sección.
+
+Los nombres y columnas preliminares no prevalecen sobre el esquema 0.1.0. Debe revisarse
+si conviene añadir hojas para secciones, muros y materiales o una representación equivalente.
+Esa decisión no se adopta silenciosamente en RCWD-001A.
+
+El adaptador deberá conservar cadenas decimales con más precisión que la capacidad
+numérica nativa de Excel, convertir entradas de forma explícita y traducir las rutas
+de ValidationIssue a celdas. La implementación y sus pruebas pertenecen a RCWD-001B.

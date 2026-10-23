@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "structurelab-rcwalldetailer"
-version = "0.0.1"
-description = "Arquitectura inicial de StructureLab RCWallDetailer"
+version = "0.1.0"
+description = "Contratos canónicos V0.1 de StructureLab RCWallDetailer"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["pydantic>=2.7,<3"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "ruff>=0.9,<1"]

@@ -1,75 +1,95 @@
-# Convenciones iniciales
+# Convenciones de contratos y desarrollo
 
-Estas convenciones organizan el repositorio. Las decisiones que cambien el significado
-estructural de un dato permanecen pendientes hasta su definición explícita.
+## Organización y nombres
 
-## Nombres y módulos
+Distribución: `structurelab-rcwalldetailer`. Paquete: `rcwall` bajo src.
+Módulos, funciones y variables en snake_case; clases en PascalCase; constantes en
+UPPER_SNAKE_CASE. Identificadores de código en inglés, documentación de uso en español.
 
-- Distribución: `structurelab-rcwalldetailer`. Paquete importable: `rcwall`.
-- Código Python: módulos, funciones y variables en `snake_case`; clases en `PascalCase`;
-  constantes en `UPPER_SNAKE_CASE`.
-- Identificadores de código y contratos en inglés; documentación de uso en español.
-- Modelos y operaciones públicas nuevos deberán declarar tipos y documentar su alcance.
-- Usar `src/rcwall/` y las fronteras de `architecture.md`. Evitar módulos genéricos
-  `utils`, capas de repositorio o bases abstractas sin un caso concreto.
+Los modelos y funciones públicas declaran tipos y alcance. Las dependencias siguen
+architecture.md: el dominio no importa geometría, validación, Excel, archivos ni CAD.
+Las salidas regenerables de trabajo van en outputs/ o generated/. Los esquemas y
+ejemplos de contratos se versionan en schemas/ y examples/ para revisión y pruebas.
+No ignorar globalmente archivos JSON/XLSX/DXF. No importar borradores de .work/.
 
-## Unidades y coordenadas
+## Identidad y relaciones
 
-- Unidad interna inicial de longitud: milímetro. En futuros campos escalares expuestos,
-  expresar la unidad, por ejemplo con el sufijo `_mm`, cuando corresponda.
-- No mezclar valores de unidades distintas ni inferir conversiones a partir de su magnitud.
-- Un cero numérico y un valor ausente no son equivalentes. Los valores predeterminados
-  con significado geométrico requieren una decisión explícita.
-- El origen local, los ejes de sección, el signo de Z, las orientaciones de contorno,
-  las tolerancias y la representación angular siguen pendientes. No se establece un
-  origen implícito ni se ajustan coordenadas automáticamente.
-- Los formatos de número de Excel no definen las unidades ni la precisión geométrica.
+- ID-01: un espacio global de IDs en cada ProjectDefinition, incluido el proyecto,
+  entidades anidadas de barras explícitas y colecciones principales.
+- ID-02: los IDs no dependen de filas Excel, orden de colecciones ni handles CAD.
+- Texto no vacío sin espacios, sensible a mayúsculas. No se recorta, normaliza,
+  renumera ni genera automáticamente. La estabilidad es responsabilidad del autor
+  entre revisiones; los modelos inmutables evitan cambios accidentales en memoria.
+- level_id y template_id son referencias externas declaradas, no entidades de catálogos
+  existentes en V0.1. Una cadena no demuestra que ese nivel/plantilla exista fuera del proyecto.
+- Una sección es geometría + configuración compatible + materiales. Un muro físico
+  tiene identidad propia y se relaciona con secciones mediante asignaciones.
+- Una única asignación por muro/nivel; las subdivisiones sin representación se rechazan.
 
-## Identificadores y referencias
+## Coordenadas
 
-Los identificadores del dominio deberán ser independientes de las filas de Excel y de
-los handles CAD. No renumerarlos al ordenar un libro. La identidad de una entidad y su
-etiqueta de presentación son conceptos diferentes.
+GEO-01/02: mano derecha, sección horizontal xy, z vertical positivo.
+GEO-03: contorno exterior antihorario y huecos horarios, vistos desde +z.
+RECTANGLE exige origen local explícito en su esquina inferior izquierda; longitud en
++x y espesor en +y. No se asigna automáticamente el origen (0,0).
 
-Quedan pendientes el alcance de unicidad, la sensibilidad a mayúsculas, caracteres
-permitidos, generación automática, referencias a catálogos externos y política de
-duplicados. Esas reglas se fijarán junto con los contratos, no mediante normalizaciones
-silenciosas del lector.
+POLYGON admite un exterior simple y huecos interiores disjuntos. Cierre implícito,
+sin duplicar el primer punto. No se invierten, recortan, desplazan ni reparan contornos.
+GEO-04 queda aplazado: sin transformación local/global, ejes globales o cotas deducidas.
+Multipolígonos, curvas e islas dentro de huecos quedan explícitamente fuera de V0.1.
+
+## Unidades y precisión
+
+Longitudes internas en milímetros con sufijo _mm. units debe declarar mm. No hay
+conversiones de unidades ni inferencias por magnitud. Las propiedades materiales
+opcionales conservan su unidad textual explícita, sin interpretación automática.
+
+NUM-01: Decimal para valores declarados; entrada Python mediante Decimal, string o int.
+Se rechazan float y bool en esos campos. La lectura JSON usa Decimal directamente para
+tokens no enteros. La escritura canónica utiliza cadenas decimales; las cantidades
+mantienen tipo entero. El valor y escala Decimal se conservan; el formato fuente no.
+
+NUM-02/03: ninguna tolerancia permite aceptar incumplimientos. No existe epsilon global.
+Los predicados de orientación/intersección/área operan con Fraction exacta a partir
+de Decimal, evitando incluso redondeos del contexto aritmético Decimal.
+
+NUM-04: ningún ajuste geométrico silencioso. La clave temporal de comparación puede
+omitir puntos collineales redundantes para probar equivalencia, pero nunca altera
+la entrada ni sustituye su representación. No se fusionan objetos equivalentes.
+
+Cero y ausencia son distintos. Diámetros, dimensiones, cantidades y offsets no tienen
+valores estructurales predeterminados. Una colección omitida es vacía; un campo opcional
+omitido es None, sin activar reglas de resolución implícitas.
 
 ## Versionado
 
-La versión del paquete reside en `pyproject.toml`; RCWD-000 comienza en `0.0.1`.
-Se emplearán versiones de paquete `MAJOR.MINOR.PATCH`. El esquema canónico tendrá una
-versión explícita separada: no existe un esquema publicado en este hito.
+La versión del paquete reside en pyproject.toml. schema_version del proyecto es
+independiente y en esta primera publicación solo acepta 0.1.0. Que ambos números
+coincidan ahora no establece una dependencia entre ellos.
 
-Una modificación incompatible debe identificar consumidores afectados, nueva versión
-de esquema y tratamiento de entradas anteriores. Antes de publicar RCWD-001 se decidirá
-la compatibilidad soportada y si las migraciones son automáticas o explícitas. No se
-deduce una versión del contrato a partir del nombre del archivo Excel.
+Cambios incompatibles requieren nueva versión de esquema y decisión explícita sobre
+consumidores y migraciones. No se deduce la versión desde un nombre de archivo.
+No existen versiones anteriores publicadas ni migraciones implementadas.
+Las variantes usan discriminadores kind/pattern y rechazan claves desconocidas.
 
 ## Pruebas y calidad
 
-Ejecutar las pruebas con `pytest` después de instalar `.[dev]`. El modo de importación
-es `importlib`; no añadir `src` manualmente a `sys.path`. Las comprobaciones iniciales
-verifican metadata de la distribución y la importación de los módulos reservados.
+Instalar .[dev] y ejecutar pytest, ruff check . y ruff format --check .
+pytest usa importlib sin alterar sys.path; se conservan las diez pruebas de RCWD-000.
+Las pruebas nuevas cubren tipos, variantes, referencias, topología, equivalencia,
+precisión y JSON. tmp_path aísla archivos temporales; no se prueba cumplimiento normativo.
 
-Para comportamientos futuros, organizar pruebas según responsabilidad bajo `tests/`
-(`domain`, `geometry`, `validation`, `io/excel`, `detailing`, `exporters/dxf`) cuando
-existan casos reales. Usar nombres `test_*.py`, datos pequeños explícitos y casos válidos,
-inválidos y de frontera. Usar `tmp_path` para archivos temporales. Las pruebas de datos
-no se deben presentar como verificación normativa.
+Ruff aplica E/F/I/UP/B y ancho de 100 caracteres. Las pruebas se separan por
+responsabilidad; nuevas carpetas por módulo se introducirán cuando el volumen lo requiera.
+No modificar reglas para ocultar fallos específicos.
 
-`ruff` aplica reglas de errores, nombres/importaciones, modernización y errores comunes
-(`E`, `F`, `I`, `UP`, `B`) y formato con ancho de 100 caracteres. No desactivar reglas
-globalmente para ocultar un fallo puntual.
+La generación reproducible de artefactos se ejecuta con
+`python scripts/generate_contract_artifacts.py`; una prueba comprueba que el esquema
+versionado coincide con los modelos actuales. JSON Schema complementa, pero no reemplaza,
+los controles de referencias, topología y límites numéricos del validador Python.
 
-## Archivos y decisiones
+## Decisiones
 
-Documentación UTF-8 en `docs/`. ADR en `docs/adr/ADR-NNN-descripcion.md`, con problema,
-alternativas, decisión, consecuencias y estado. Referenciar el ADR desde la documentación
-afectada. Distinguir aprobación conceptual y ejecución comprobada.
-
-Salidas regenerables en `outputs/` o `generated/`, ignoradas por Git. Ejemplos y fixtures
-que deban conservarse se ubicarán en rutas explícitas versionadas al implementarse su
-hito. No ignorar globalmente `.xlsx`, `.json` ni `.dxf`: pueden ser entregables legítimos.
-`.work/` almacena material local no activo y no debe importarse desde el paquete.
+Documentación UTF-8 en docs; ADR en docs/adr con problema, alternativas, decisión,
+consecuencias y estado. Conservar ADR previos e identificar qué decisiones nuevas
+resuelven sus pendientes. Separar aprobación conceptual, implementación y validación.

@@ -1,0 +1,1072 @@
+{
+  "$comment": "Canonical decimals are strings. Numeric bounds, references and topology additionally require rcwall.validation.validate_definition; schema validation is not design compliance.",
+  "$defs": {
+    "BarLayoutDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "config_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Config Id",
+          "type": "string"
+        },
+        "distribution": {
+          "discriminator": {
+            "mapping": {
+              "EXPLICIT": "#/$defs/ExplicitLayout",
+              "LINEAR_COUNT": "#/$defs/LinearCount",
+              "LINEAR_SPACING": "#/$defs/LinearSpacing"
+            },
+            "propertyName": "pattern"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/LinearCount"
+            },
+            {
+              "$ref": "#/$defs/LinearSpacing"
+            },
+            {
+              "$ref": "#/$defs/ExplicitLayout"
+            }
+          ],
+          "title": "Distribution"
+        },
+        "layout_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Layout Id",
+          "type": "string"
+        },
+        "region_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "^\\S+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region Id"
+        }
+      },
+      "required": [
+        "layout_id",
+        "config_id",
+        "distribution"
+      ],
+      "title": "BarLayoutDefinition",
+      "type": "object"
+    },
+    "BentBarDefinition": {
+      "additionalProperties": false,
+      "description": "Unresolved declaration: no inferred path, bend radius or hook.",
+      "properties": {
+        "bent_bar_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Bent Bar Id",
+          "type": "string"
+        },
+        "definition_status": {
+          "const": "UNRESOLVED",
+          "title": "Definition Status",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "diameter_mm": {
+          "anyOf": [
+            {
+              "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diameter Mm"
+        }
+      },
+      "required": [
+        "bent_bar_id",
+        "definition_status"
+      ],
+      "title": "BentBarDefinition",
+      "type": "object"
+    },
+    "DrawingSpecification": {
+      "additionalProperties": false,
+      "properties": {
+        "definition_status": {
+          "const": "UNRESOLVED",
+          "title": "Definition Status",
+          "type": "string"
+        },
+        "drawing_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Drawing Id",
+          "type": "string"
+        },
+        "drawing_scale": {
+          "anyOf": [
+            {
+              "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Drawing Scale"
+        },
+        "section_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Section Id",
+          "type": "string"
+        },
+        "template_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "^\\S+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Template Id"
+        }
+      },
+      "required": [
+        "drawing_id",
+        "section_id",
+        "definition_status"
+      ],
+      "title": "DrawingSpecification",
+      "type": "object"
+    },
+    "ExplicitBar": {
+      "additionalProperties": false,
+      "properties": {
+        "bar_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Bar Id",
+          "type": "string"
+        },
+        "diameter_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Diameter Mm",
+          "type": "string"
+        },
+        "position": {
+          "$ref": "#/$defs/Point2D"
+        }
+      },
+      "required": [
+        "bar_id",
+        "position",
+        "diameter_mm"
+      ],
+      "title": "ExplicitBar",
+      "type": "object"
+    },
+    "ExplicitLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "bars": {
+          "items": {
+            "$ref": "#/$defs/ExplicitBar"
+          },
+          "minItems": 1,
+          "title": "Bars",
+          "type": "array"
+        },
+        "pattern": {
+          "const": "EXPLICIT",
+          "title": "Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern",
+        "bars"
+      ],
+      "title": "ExplicitLayout",
+      "type": "object"
+    },
+    "GeometricReference": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "$ref": "#/$defs/Point2D"
+        },
+        "geometry_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Geometry Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "LINE",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Reference Id",
+          "type": "string"
+        },
+        "start": {
+          "$ref": "#/$defs/Point2D"
+        }
+      },
+      "required": [
+        "reference_id",
+        "geometry_id",
+        "kind",
+        "start",
+        "end"
+      ],
+      "title": "GeometricReference",
+      "type": "object"
+    },
+    "GeometryDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "geometry_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Geometry Id",
+          "type": "string"
+        },
+        "shape": {
+          "discriminator": {
+            "mapping": {
+              "POLYGON": "#/$defs/PolygonDefinition",
+              "RECTANGLE": "#/$defs/RectangleDefinition"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RectangleDefinition"
+            },
+            {
+              "$ref": "#/$defs/PolygonDefinition"
+            }
+          ],
+          "title": "Shape"
+        }
+      },
+      "required": [
+        "geometry_id",
+        "shape"
+      ],
+      "title": "GeometryDefinition",
+      "type": "object"
+    },
+    "LinearCount": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alignment"
+        },
+        "diameter_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Diameter Mm",
+          "type": "string"
+        },
+        "end_offset_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "End Offset Mm",
+          "type": "string"
+        },
+        "pattern": {
+          "const": "LINEAR_COUNT",
+          "title": "Pattern",
+          "type": "string"
+        },
+        "quantity": {
+          "exclusiveMinimum": 0,
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "reference_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Reference Id",
+          "type": "string"
+        },
+        "start_offset_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Start Offset Mm",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern",
+        "reference_id",
+        "quantity",
+        "diameter_mm",
+        "start_offset_mm",
+        "end_offset_mm"
+      ],
+      "title": "LinearCount",
+      "type": "object"
+    },
+    "LinearSpacing": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Alignment",
+          "type": "string"
+        },
+        "diameter_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Diameter Mm",
+          "type": "string"
+        },
+        "end_offset_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "End Offset Mm",
+          "type": "string"
+        },
+        "pattern": {
+          "const": "LINEAR_SPACING",
+          "title": "Pattern",
+          "type": "string"
+        },
+        "reference_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Reference Id",
+          "type": "string"
+        },
+        "spacing_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Spacing Mm",
+          "type": "string"
+        },
+        "spacing_policy": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Spacing Policy",
+          "type": "string"
+        },
+        "start_offset_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Start Offset Mm",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern",
+        "reference_id",
+        "diameter_mm",
+        "spacing_mm",
+        "start_offset_mm",
+        "end_offset_mm",
+        "spacing_policy",
+        "alignment"
+      ],
+      "title": "LinearSpacing",
+      "type": "object"
+    },
+    "MaterialProperty": {
+      "additionalProperties": false,
+      "description": "User-declared property; its name/unit do not trigger any normative interpretation.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "MaterialProperty",
+      "type": "object"
+    },
+    "MaterialSpecification": {
+      "additionalProperties": false,
+      "properties": {
+        "properties": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MaterialProperty"
+          },
+          "title": "Properties",
+          "type": "array"
+        },
+        "specification": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Specification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "specification"
+      ],
+      "title": "MaterialSpecification",
+      "type": "object"
+    },
+    "Point2D": {
+      "additionalProperties": false,
+      "properties": {
+        "x_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "X Mm",
+          "type": "string"
+        },
+        "y_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Y Mm",
+          "type": "string"
+        }
+      },
+      "required": [
+        "x_mm",
+        "y_mm"
+      ],
+      "title": "Point2D",
+      "type": "object"
+    },
+    "PolygonDefinition": {
+      "additionalProperties": false,
+      "description": "Implicitly closed rings. Topology and winding are checked in geometry/validation.",
+      "properties": {
+        "holes": {
+          "default": [],
+          "items": {
+            "items": {
+              "$ref": "#/$defs/Point2D"
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "title": "Holes",
+          "type": "array"
+        },
+        "kind": {
+          "const": "POLYGON",
+          "title": "Kind",
+          "type": "string"
+        },
+        "outer": {
+          "items": {
+            "$ref": "#/$defs/Point2D"
+          },
+          "minItems": 3,
+          "title": "Outer",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "outer"
+      ],
+      "title": "PolygonDefinition",
+      "type": "object"
+    },
+    "RectangleDefinition": {
+      "additionalProperties": false,
+      "description": "Axis-aligned rectangle with explicit lower-left origin in the local xy plane.",
+      "properties": {
+        "kind": {
+          "const": "RECTANGLE",
+          "title": "Kind",
+          "type": "string"
+        },
+        "length_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Length Mm",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/Point2D"
+        },
+        "thickness_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Thickness Mm",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "origin",
+        "length_mm",
+        "thickness_mm"
+      ],
+      "title": "RectangleDefinition",
+      "type": "object"
+    },
+    "RegionDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "geometry_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Geometry Id",
+          "type": "string"
+        },
+        "region_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Region Id",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "BOUNDARY",
+            "WEB",
+            "OTHER"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "shape": {
+          "discriminator": {
+            "mapping": {
+              "POLYGON": "#/$defs/PolygonDefinition",
+              "RECTANGLE": "#/$defs/RectangleDefinition"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RectangleDefinition"
+            },
+            {
+              "$ref": "#/$defs/PolygonDefinition"
+            }
+          ],
+          "title": "Shape"
+        }
+      },
+      "required": [
+        "region_id",
+        "geometry_id",
+        "role",
+        "shape"
+      ],
+      "title": "RegionDefinition",
+      "type": "object"
+    },
+    "ReinforcementConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "config_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Config Id",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "geometry_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Geometry Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "config_id",
+        "geometry_id"
+      ],
+      "title": "ReinforcementConfiguration",
+      "type": "object"
+    },
+    "SectionAssignment": {
+      "additionalProperties": false,
+      "properties": {
+        "assignment_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Assignment Id",
+          "type": "string"
+        },
+        "level_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Level Id",
+          "type": "string"
+        },
+        "section_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Section Id",
+          "type": "string"
+        },
+        "wall_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Wall Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assignment_id",
+        "wall_id",
+        "level_id",
+        "section_id"
+      ],
+      "title": "SectionAssignment",
+      "type": "object"
+    },
+    "SectionDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "config_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Config Id",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "geometry_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Geometry Id",
+          "type": "string"
+        },
+        "materials": {
+          "$ref": "#/$defs/SectionMaterials"
+        },
+        "section_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Section Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section_id",
+        "geometry_id",
+        "config_id",
+        "materials"
+      ],
+      "title": "SectionDefinition",
+      "type": "object"
+    },
+    "SectionMaterials": {
+      "additionalProperties": false,
+      "properties": {
+        "concrete": {
+          "$ref": "#/$defs/MaterialSpecification"
+        },
+        "reinforcement": {
+          "$ref": "#/$defs/MaterialSpecification"
+        }
+      },
+      "required": [
+        "concrete",
+        "reinforcement"
+      ],
+      "title": "SectionMaterials",
+      "type": "object"
+    },
+    "TransverseAssembly": {
+      "additionalProperties": false,
+      "properties": {
+        "assembly_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Assembly Id",
+          "type": "string"
+        },
+        "bent_bar_ids": {
+          "default": [],
+          "items": {
+            "minLength": 1,
+            "pattern": "^\\S+$",
+            "type": "string"
+          },
+          "title": "Bent Bar Ids",
+          "type": "array"
+        },
+        "config_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Config Id",
+          "type": "string"
+        },
+        "definition_status": {
+          "const": "UNRESOLVED",
+          "title": "Definition Status",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "region_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "^\\S+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region Id"
+        }
+      },
+      "required": [
+        "assembly_id",
+        "config_id",
+        "definition_status"
+      ],
+      "title": "TransverseAssembly",
+      "type": "object"
+    },
+    "VerticalPlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "assembly_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Assembly Id",
+          "type": "string"
+        },
+        "assignment_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Assignment Id",
+          "type": "string"
+        },
+        "definition_status": {
+          "const": "UNRESOLVED",
+          "title": "Definition Status",
+          "type": "string"
+        },
+        "placement_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Placement Id",
+          "type": "string"
+        },
+        "spacing_mm": {
+          "anyOf": [
+            {
+              "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spacing Mm"
+        },
+        "spacing_policy": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Spacing Policy"
+        },
+        "z_end_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Z End Mm",
+          "type": "string"
+        },
+        "z_start_mm": {
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "title": "Z Start Mm",
+          "type": "string"
+        }
+      },
+      "required": [
+        "placement_id",
+        "assignment_id",
+        "assembly_id",
+        "definition_status",
+        "z_start_mm",
+        "z_end_mm"
+      ],
+      "title": "VerticalPlacement",
+      "type": "object"
+    },
+    "WallDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "wall_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Wall Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "wall_id"
+      ],
+      "title": "WallDefinition",
+      "type": "object"
+    }
+  },
+  "$id": "urn:rcwall:project-definition:0.1.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assignments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/SectionAssignment"
+      },
+      "title": "Assignments",
+      "type": "array"
+    },
+    "bar_layouts": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/BarLayoutDefinition"
+      },
+      "title": "Bar Layouts",
+      "type": "array"
+    },
+    "bent_bars": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/BentBarDefinition"
+      },
+      "title": "Bent Bars",
+      "type": "array"
+    },
+    "configurations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ReinforcementConfiguration"
+      },
+      "title": "Configurations",
+      "type": "array"
+    },
+    "drawings": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DrawingSpecification"
+      },
+      "title": "Drawings",
+      "type": "array"
+    },
+    "geometries": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GeometryDefinition"
+      },
+      "title": "Geometries",
+      "type": "array"
+    },
+    "project_id": {
+      "minLength": 1,
+      "pattern": "^\\S+$",
+      "title": "Project Id",
+      "type": "string"
+    },
+    "references": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GeometricReference"
+      },
+      "title": "References",
+      "type": "array"
+    },
+    "regions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RegionDefinition"
+      },
+      "title": "Regions",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sections": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/SectionDefinition"
+      },
+      "title": "Sections",
+      "type": "array"
+    },
+    "transverse_assemblies": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TransverseAssembly"
+      },
+      "title": "Transverse Assemblies",
+      "type": "array"
+    },
+    "units": {
+      "const": "mm",
+      "title": "Units",
+      "type": "string"
+    },
+    "vertical_placements": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/VerticalPlacement"
+      },
+      "title": "Vertical Placements",
+      "type": "array"
+    },
+    "walls": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/WallDefinition"
+      },
+      "title": "Walls",
+      "type": "array"
+    }
+  },
+  "required": [
+    "project_id",
+    "schema_version",
+    "units"
+  ],
+  "title": "ProjectDefinition",
+  "type": "object"
+}

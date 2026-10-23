@@ -1,7 +1,8 @@
 # Arquitectura inicial
 
-Estado: arquitectura adoptada en RCWD-000. Los paquetes existen como estructura vacía;
-el flujo descrito es el objetivo de implementación, no una capacidad actual.
+Estado: arquitectura adoptada en RCWD-000 y conservada en RCWD-001A. Están implementados
+contratos, validación, predicados geométricos exactos y JSON. Excel, detallado y CAD
+permanecen reservados; el flujo completo descrito sigue siendo un objetivo.
 
 ## Responsabilidades y dependencias
 
@@ -14,8 +15,8 @@ el flujo descrito es el objetivo de implementación, no una capacidad actual.
 | `io/excel` | Generar/leer plantillas, interpretar tipos y conservar ubicación de errores | `domain`, `validation` |
 | `exporters/dxf` | Transformar únicamente resultados resueltos y especificaciones de dibujo a DXF | `domain`, `geometry` |
 
-`io` y `exporters` son espacios de nombres para adaptadores. La serialización JSON futura
-puede vivir en `io` sin crear una capa adicional. Una función de aplicación futura podrá
+`io` y `exporters` son espacios de nombres para adaptadores. `io/json.py` implementa
+serialización y depende de `domain` y `validation`, como la futura frontera Excel. Una función de aplicación futura podrá
 coordinar estos módulos cuando exista un flujo ejecutable; no se crea un servicio abstracto
 ni una CLI vacía en este hito.
 
@@ -52,18 +53,19 @@ superar controles de tipos, referencias o topología.
   biblioteca CAD. Los tipos de intercambio pertenecen al dominio; las operaciones a `geometry`.
 - La entrada conserva las instrucciones originales. La salida contiene su resolución
   independiente del patrón de origen, con trazabilidad prevista hacia la entrada.
-- Unidades internas: milímetros explícitos. La elección de origen, ejes, orientación,
-  tolerancias y reglas de transformación permanece pendiente.
+- Unidades internas: milímetros, mano derecha, xy horizontal y z vertical positivo.
+  Exteriores antihorarios y huecos horarios. Origen del rectángulo explícito.
+  Transformaciones local/global aplazadas; no hay epsilon global.
 - La geometría arbitraria es un objetivo conceptual; cada versión declarará qué
   representaciones acepta y rechazará de forma explícita las no soportadas.
-- Las bibliotecas específicas se incorporarán en sus fronteras cuando sean necesarias.
-  No hay dependencias de ejecución en este hito.
+- Pydantic es la dependencia directa para contratos. Los predicados geométricos usan
+  Fraction de la biblioteca estándar a partir de los valores Decimal originales.
 
-## Preparación para RCWD-001
+## Implementación RCWD-001A y preparación para RCWD-001B
 
-Ubicar contratos en `domain`, comprobaciones topológicas reutilizables en `geometry`,
-validación de relaciones en `validation`, entrada Excel en `io/excel` y serialización JSON
-en `io`. La metadata de hoja/fila pertenece al adaptador y se traduce al reporte; no se
+Los contratos viven en `domain/models.py`, los predicados en `geometry/polygons.py`,
+la validación en `validation/project.py`, la equivalencia de secciones en
+`validation/equivalence.py` y JSON en `io/json.py`. Excel seguirá en `io/excel`. La metadata de hoja/fila pertenece al adaptador y se traduce al reporte; no se
 introduce una dependencia inversa del dominio al libro. El generador de plantilla deberá
 derivar o verificar su correspondencia con los contratos versionados.
 

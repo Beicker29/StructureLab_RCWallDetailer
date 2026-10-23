@@ -1,35 +1,36 @@
 # StructureLab RCWallDetailer
 
-Herramienta de ingeniería en desarrollo para el detallado automatizado de secciones de
-muros de concreto reforzado. El flujo previsto recibe definiciones desde Excel, utiliza
-contratos canónicos versionados y serializables a JSON, resuelve geometría de refuerzo y
-exporta detalles editables inicialmente a DXF.
+Herramienta de ingeniería en desarrollo para el detallado de secciones de muros de
+concreto reforzado. El flujo previsto recibe definiciones desde Excel, utiliza contratos
+canónicos versionados y serializables a JSON, resuelve geometría de refuerzo y exporta
+detalles editables inicialmente a DXF.
 
-El proyecto es independiente de DCCAD3, AutoCAD y formatos propietarios. La validación
-de datos, la resolución geométrica, las verificaciones normativas y la representación CAD
-tendrán responsabilidades separadas.
+El proyecto es independiente de DCCAD3, AutoCAD y formatos propietarios. Los contratos,
+la resolución geométrica, las verificaciones normativas y la representación CAD mantienen
+responsabilidades separadas.
 
-## Estado real: RCWD-000
+## Estado real: RCWD-001A
 
-Implementado: estructura instalable `src/rcwall/`, configuración de desarrollo, pruebas de
-instalación/importación y documentación de arquitectura y decisiones.
+Implementados los contratos canónicos V0.1 mediante Pydantic, geometrías rectangulares y
+poligonales con huecos, validación de tipos/referencias/topología, comparaciones acotadas
+de equivalencia y lectura/escritura JSON con valores decimales exactos.
 
-Los módulos contienen únicamente documentación de su responsabilidad. Todavía no hay
-contratos estructurales ejecutables, lector/generador Excel, serializador de proyectos,
-motor geométrico, distribución de acero, verificación normativa ni exportador DXF.
-No existe un comando CLI funcional. RCWD-001 es el siguiente hito.
+Geometría, configuración, sección reforzada y muro físico son entidades distintas. Una
+configuración puede reutilizarse entre secciones; las secciones incluyen materiales y
+pueden asignarse a distintos muros y niveles. No se fusionan entidades equivalentes.
 
-La solicitud RCWD-000 reemplazó una implementación parcial iniciada para RCWD-001.
-Esos borradores se conservaron localmente en `.work/rcwd-001-draft/`, excluidos del
-paquete, de las pruebas y del control de versiones. No son una API ni un esquema aprobado.
+Los contratos transversales, de colocación vertical y de dibujo conservan declaraciones
+con estado `UNRESOLVED`. `DetailingResult` es una envoltura reservada con estado
+`NOT_IMPLEMENTED`. La equivalencia física del refuerzo siempre se informa como indeterminada.
+
+Pendientes: Excel (RCWD-001B), posiciones calculadas de barras, motores de detallado,
+transformaciones local/global, verificación normativa y exportación DXF. No existe CLI.
+La validación de datos no demuestra cumplimiento de una norma estructural.
 
 ## Instalación y desarrollo
 
-Requisitos: Python 3.11 o posterior con `pip` y `venv`. No se necesita Excel, AutoCAD ni
-licencia CAD para instalar o ejecutar las comprobaciones iniciales. Los comandos siguientes
-se ejecutan desde la raíz del repositorio.
-
-En Windows PowerShell:
+Requisitos: Python 3.11 o posterior con pip y venv. No se necesita Excel ni software CAD.
+Desde la raíz del repositorio, en Windows PowerShell:
 
 ```powershell
 python -m venv .venv
@@ -41,49 +42,96 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m ruff format --check .
 ```
 
-En Linux/macOS, usar los mismos argumentos con `.venv/bin/python` después de crear
-el entorno con `python3 -m venv .venv`. No es necesario activar el entorno.
+En Linux/macOS, crear el entorno con `python3 -m venv .venv` y utilizar
+`.venv/bin/python` con los mismos argumentos. No hace falta activar el entorno.
+Para instalar sin herramientas de desarrollo: `python -m pip install .`.
 
-Para una instalación de uso sin herramientas de desarrollo: `python -m pip install .`.
-El paquete importable se llama `rcwall`; la distribución se llama
-`structurelab-rcwalldetailer`. Las pruebas requieren instalar primero la distribución;
-no modifican `PYTHONPATH` para simular una instalación.
+La distribución se llama `structurelab-rcwalldetailer`; el paquete importable es
+`rcwall`. Las pruebas requieren instalar primero la distribución y no modifican
+PYTHONPATH. Pydantic 2 es la única dependencia directa de ejecución para contratos,
+validación local y JSON Schema. Setuptools construye el paquete; pytest y Ruff
+pertenecen al extra de desarrollo. No se incorporan dependencias Excel o CAD.
 
-No hay dependencias de ejecución en RCWD-000. `setuptools` construye el paquete;
-`pytest` ejecuta pruebas y `ruff` revisa y formatea Python, ambos en el extra `dev`.
-Pydantic, openpyxl y una biblioteca DXF se incorporarán cuando se implementen los
-hitos que los requieran, con sus decisiones registradas.
+## Uso de los contratos
+
+```python
+from rcwall.io.json import read_project, dumps_project, write_project_schema
+from rcwall.validation import validate_definition
+from rcwall.validation.equivalence import compare_section_definitions
+
+project = read_project("examples/project_v0_1.json")
+outcome = validate_definition(project)
+print(outcome.report.model_dump(mode="json"))
+print(compare_section_definitions(project, "S1", "S2").status)
+text = dumps_project(project)
+write_project_schema("schemas/project_definition-0.1.0.schema.json")
+```
+
+`validate_definition(datos)` devuelve un proyecto aceptado o `project=None`, junto con
+un reporte. `read_project`, `loads_project`, `dumps_project` y `write_project` usan
+validación completa y lanzan `ProjectValidationError`, con atributo `.report`, si
+encuentran errores. Construir un modelo Pydantic solo comprueba sus contratos locales;
+para aceptar un proyecto se deben validar además referencias y geometría.
+
+Introducir decimales como texto, Decimal o enteros. La API Python rechaza float.
+El JSON canónico escribe decimales como cadenas y cantidades como enteros. El lector
+también admite tokens numéricos decimales, procesados directamente como Decimal.
+Los anillos se cierran implícitamente y deben venir con orientación correcta, sin repetir
+el primer vértice. No se reparan ni se redondean entradas.
+
+Regenerar el esquema y el ejemplo desde el código:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/generate_contract_artifacts.py
+```
+
+El [ejemplo JSON](examples/project_v0_1.json) contiene entradas ilustrativas declaradas,
+no recomendaciones de diseño ni resultados calculados. Conserva dos secciones equivalentes
+con identidades distintas. El [JSON Schema](schemas/project_definition-0.1.0.schema.json)
+cubre la estructura canónica; la positividad de decimales escritos como texto, las
+referencias y la topología requieren además el validador Python.
 
 ## Estructura
 
 ```text
 src/rcwall/
   domain/          Contratos, entidades y relaciones
-  geometry/        Representaciones y operaciones geométricas
-  detailing/       Resolución del refuerzo longitudinal y transversal
-  validation/      Datos, geometría y futuras reglas normativas separadas
-  io/excel/        Interfaz Excel y ubicación de errores en celdas
-  exporters/dxf/   Exportación del resultado resuelto
-tests/             Pruebas iniciales de instalación e importación
+  geometry/        Predicados topológicos y equivalencia geométrica exacta
+  detailing/       Reservado para motores de resolución
+  validation/      Tipos, referencias, geometría y equivalencia de definiciones
+  io/json.py       Lectura/escritura JSON y generación de esquema
+  io/excel/        Reservado para RCWD-001B
+  exporters/dxf/   Reservado para exportación
+tests/             Instalación, contratos, topología, equivalencia y JSON
 docs/              Especificaciones, convenciones y ADR
+schemas/           JSON Schema generado para V0.1
+examples/          Ejemplo canónico de entrada
+scripts/           Regeneración de artefactos de contratos
 ```
 
-La dirección de dependencias parte de los adaptadores hacia el dominio. El dominio
-no conoce libros Excel, bibliotecas CAD ni rutas de archivos. El flujo completo y los
-límites de cada módulo están en [Arquitectura](docs/architecture.md).
+El dominio no conoce libros Excel, rutas de archivos ni bibliotecas CAD.
+Los predicados geométricos usan Fraction de la biblioteca estándar sobre los valores
+Decimal originales, sin epsilon global.
 
-## Documentación
+## Documentación y comprobaciones
 
-- [Requisitos aprobados y decisiones pendientes](docs/requirements.md).
-- [Propuesta de contratos de datos](docs/data_contracts.md).
-- [Interfaz Excel V0.1 preliminar](docs/excel_interface.md).
-- [Hoja de ruta RCWD-000 a RCWD-006](docs/development_roadmap.md).
-- [Convenciones de desarrollo](docs/conventions.md).
+- [Arquitectura y dependencias](docs/architecture.md).
+- [Requisitos aprobados y pendientes](docs/requirements.md).
+- [Contratos implementados y límites](docs/data_contracts.md).
+- [Interfaz Excel preliminar](docs/excel_interface.md).
+- [Hoja de ruta](docs/development_roadmap.md).
+- [Convenciones](docs/conventions.md).
 - [ADR-001: independencia del dominio](docs/adr/ADR-001-domain-independence.md).
 - [ADR-002: modelo canónico](docs/adr/ADR-002-canonical-data-model.md).
-- [ADR-003: distribución paramétrica y explícita](docs/adr/ADR-003-reinforcement-layouts.md).
+- [ADR-003: distribuciones](docs/adr/ADR-003-reinforcement-layouts.md).
+- [ADR-004: identidad y equivalencia](docs/adr/ADR-004-identity-and-equivalence.md).
+- [ADR-005: coordenadas y precisión](docs/adr/ADR-005-coordinates-and-precision.md).
 - [Instrucciones para agentes](AGENTS.md).
 
-Antes de RCWD-001 deben resolverse o delimitarse explícitamente los campos condicionales,
-enumeraciones, referencias, coordenadas y políticas de compatibilidad del esquema. La
-estructura permite implementar ese hito sin cambiar la raíz del paquete ni sus límites.
+Validación realizada con Python 3.12: 115 pruebas aprobadas, incluidas las diez de
+RCWD-000; Ruff check y Ruff format --check sin errores. Esto verifica contratos y
+el subconjunto geométrico descrito, no un motor ni una comprobación normativa.
+
+RCWD-001B deberá adaptar las hojas preliminares a los contratos actuales, incluyendo
+secciones, materiales y muros físicos. Las políticas de distribución, la geometría
+transversal y las transformaciones permanecen delimitadas como trabajo posterior.
